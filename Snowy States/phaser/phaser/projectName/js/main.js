@@ -10,6 +10,8 @@ var score;
 var scoreText;
 var enemy1;
 var enemy2;
+var starAmount = 12;
+var popsound;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -25,6 +27,9 @@ MainMenu.prototype = {
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
+		
+		// load pop sound
+		game.load.audio('popsound', 'assets/audio/pop.mp3');
 	},
 	create: function() {
 		console.log('MainMenu: create');
@@ -54,12 +59,16 @@ GamePlay.prototype = {
 		// add sky background
 		game.add.sprite(0, 0, 'sky');
 
+		// add pop sound
+		popsound = game.add.audio('popsound');
+
 		// add physics to Phaser
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 
 		// initialize score to 0
 		score = 0;
 		scoreText = 'Score: 0';
+		starAmount = 12;
 
 		// create group for platforms
 		platforms = game.add.group();
@@ -100,7 +109,6 @@ GamePlay.prototype = {
 		stars = game.add.group();
 		stars.enableBody = true;
 		// create 12 stars distributed across x axis
-		var starAmount = 12;
 		for (var i = 0; i < starAmount; i++) {
 			var star = stars.create(i * (game.world.width / starAmount), 0, 'star');
 			star.body.gravity.y = 60;
@@ -181,6 +189,7 @@ GameOver.prototype = {
 	create: function() {
 		console.log('GameOver: create');
 
+		// display text on gameover screen
 		var gameoverText1 = game.add.text(16, 100, "GAME OVER!", {fontSize: '32px', file: '#000'});
 		var gameoverText2 = game.add.text(16, 150, "Your final score: " + score, {fontSize: '32px', file: '#000'});
 		var gameoverText3 = game.add.text(16, 200, 'Press SPACE to restart!', {fontSize: '32px', file: '#000'});
@@ -189,7 +198,7 @@ GameOver.prototype = {
 		gameoverText3.addColor("#ff0000", 0); //red
 	},
 	update: function() {
-		// gameover logic
+		// restart game if SPACE is pressed
 		if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			game.state.start('MainMenu');
 		}
@@ -209,6 +218,15 @@ function collectStar(player, star) {
 	// increment score
 	score += 10;
 	scoreText.text = 'Score: ' + score;
+
+	// end game if all stars are collected
+	starAmount--;
+	if (starAmount <= 0) {
+		game.state.start('GameOver');
+	}
+
+	// play pop sound
+	popsound.play(); 
 }
 
 function collectDiamond(player, diamond) {
