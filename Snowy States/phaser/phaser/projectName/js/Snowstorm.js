@@ -14,6 +14,9 @@ function Snowflake(game, key, frame, scale, rotation) {
 	this.xVelocity = 200 * Math.random();
 	this.yVelocity = (200 * Math.random()) + 10;
 
+	// this is so the player can't hold down "R"
+	// (there has got to be an easier way to do this
+	// but i could not find it)
 	this.canPressR = true;
 
 	game.physics.enable(this);
