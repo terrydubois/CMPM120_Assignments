@@ -45,19 +45,19 @@ MainMenu.prototype = {
 	update: function() {
 		// main menu logic
 		if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			game.state.start('GamePlay');
+			game.state.start('Play');
 		}
 	}
 }
 
 // define gameplay state and methods
-var GamePlay = function(game) {};
-GamePlay.prototype = {
+var Play = function(game) {};
+Play.prototype = {
 	preload: function() {
-		console.log('GamePlay: preload');
+		console.log('Play: preload');
 	},
 	create: function() {
-		console.log('GamePlay: create');
+		console.log('Play: create');
 
 		// add sky background
 		game.add.sprite(0, 0, 'sky');
@@ -217,7 +217,7 @@ GameOver.prototype = {
 
 // add states to StateManager
 game.state.add('MainMenu', MainMenu);
-game.state.add('GamePlay', GamePlay);
+game.state.add('Play', Play);
 game.state.add('GameOver', GameOver);
 game.state.start('MainMenu');
 
