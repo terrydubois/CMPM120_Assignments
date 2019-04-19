@@ -36,6 +36,7 @@ MainMenu.prototype = {
 	create: function() {
 		console.log('MainMenu: create');
 
+		// main menu text and instructions
 		var titleText = game.add.text(16, 100, "TERRY'S AMAZING GAME", {fontSize: '32px', file: '#000'});
 		var subtitleText = game.add.text(16, 150, "Press SPACE to start!", {fontSize: '32px', file: '#000'});
 		titleText.addColor("#ff0000", 0); //red
@@ -145,7 +146,7 @@ GamePlay.prototype = {
 		enemy2.animations.add('right', [2, 3], 10, true);
 		enemy2.animations.play('right');
 
-		// add snowflakes
+		// add 100 snowflakes
 		for (var i = 0; i < 100; i++) {
 			this.snowflake = new Snowflake(game, 'dog', 'snowflake', 1, 360 * Math.random());
 			game.add.existing(this.snowflake);
@@ -158,7 +159,6 @@ GamePlay.prototype = {
 		game.physics.arcade.collide(enemies, platforms);
 
 		// get keyboard input and update player physics and animations
-		
 		player.body.velocity.x = 0;
 		if (cursors.left.isDown) {
 			player.body.velocity.x = -150;
@@ -256,6 +256,7 @@ function hitEnemy(player, enemy) {
 	score -= 25;
 	scoreText.text = 'Score: ' + score;
 
+	// game over if hit enemy
 	game.state.start('GameOver');
 }
 
