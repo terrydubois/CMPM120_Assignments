@@ -6,7 +6,7 @@ var game = new Phaser.Game(600, 800, Phaser.AUTO);
 var player;
 var platforms;
 var diamonds;
-var score;
+//var score;
 var scoreText;
 var enemy1;
 var enemy2;
@@ -53,6 +53,10 @@ MainMenu.prototype = {
 // define gameplay state and methods
 var Play = function(game) {};
 Play.prototype = {
+	init: function() {
+		console.log('Play: init');
+		this.score = 0;
+	},
 	preload: function() {
 		console.log('Play: preload');
 	},
