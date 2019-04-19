@@ -12,6 +12,7 @@ var enemy1;
 var enemy2;
 var starAmount = 12;
 var popsound;
+var hitPlatform;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -25,6 +26,7 @@ MainMenu.prototype = {
 		game.load.image('ground', 'assets/img/platform.png');
 		game.load.image('star', 'assets/img/star.png');
 		game.load.image('diamond', 'assets/img/diamond.png');
+		game.load.image('dog', 'assets/img/dog.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
@@ -142,14 +144,21 @@ GamePlay.prototype = {
 		enemy1.animations.play('left');
 		enemy2.animations.add('right', [2, 3], 10, true);
 		enemy2.animations.play('right');
+
+		// add snowflakes
+		for (var i = 0; i < 100; i++) {
+			this.snowflake = new Snowflake(game, 'dog', 'snowflake', 1, 360 * Math.random());
+			game.add.existing(this.snowflake);
+		}
 	},
 	update: function() {
 		// gameplay logic
 		// platform collisions
-		var hitPlatform = game.physics.arcade.collide(player, platforms);
+		hitPlatform = game.physics.arcade.collide(player, platforms);
 		game.physics.arcade.collide(enemies, platforms);
 
 		// get keyboard input and update player physics and animations
+		
 		player.body.velocity.x = 0;
 		if (cursors.left.isDown) {
 			player.body.velocity.x = -150;
@@ -177,6 +186,7 @@ GamePlay.prototype = {
 		game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this);
 		// enemy collision with player
 		game.physics.arcade.overlap(player, enemies, hitEnemy, null, this);
+		
 	}
 }
 
