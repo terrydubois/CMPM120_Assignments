@@ -1,5 +1,5 @@
 // avoid constructor
-function Avoid(game, key, frame, scale, rotation, pos) {
+function Avoid(game, key, frame, scale, rotation, pos, criticalY) {
 
 	this.pos = pos;
 
@@ -15,6 +15,9 @@ function Avoid(game, key, frame, scale, rotation, pos) {
 	this.scale.y = scale;
 	this.rotation = rotation;
 	this.alpha = 1;
+	this.criticalY = criticalY;
+	this.givenScore = false;
+	this.game = game;
 
 	// set velocity of this
 	this.xVelocity = -175 + (this.pos * 50);
@@ -57,9 +60,6 @@ Avoid.prototype.update = function() {
 	// change velocity of star
 	this.xVelocity -= this.rate * (25 - (this.pos * 3));
 	this.yVelocity += this.rate * 15;
-
-
-
 
 	
 	if (this.body.y > game.world.height + 50) {

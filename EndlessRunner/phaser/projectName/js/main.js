@@ -7,28 +7,31 @@ var playerXStart;
 var playerYStart;
 var cursors;
 var playerGroup;
+var score;
 
 // define menu state and methods
 var MainMenu = function(game) {};
 MainMenu.prototype = {
 	preload: function() {
 		console.log('MainMenu: preload');
-
 	
 		// load game sprites
-		game.load.image('sky', 'assets/img/sky.png');
-		game.load.image('grass', 'assets/img/grass.png');
-		game.load.image('ground', 'assets/img/platform.png');
-		game.load.image('star', 'assets/img/star.png');
+		game.load.image('sky', 'assets/img/skysun.png');
+		game.load.image('ground', 'assets/img/ground.png');
+		game.load.image('bluedot', 'assets/img/bluedot.png');
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('dog', 'assets/img/dog.png');
 		game.load.image('guy', 'assets/img/guy.png');
-		game.load.image('sun', 'assets/img/sun.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
 		// load pop sound
 		game.load.audio('popsound', 'assets/audio/pop.mp3');
+
+		// align game to center of screen
+		game.scale.pageAlignHorizontally = true;
+		game.scale.pageAlignVertically = true;
+		game.scale.refresh();
 	},
 	create: function() {
 		console.log('MainMenu: create');
@@ -39,10 +42,6 @@ MainMenu.prototype = {
 		titleText.addColor("#ff0000", 0); //red
 		subtitleText.addColor("#ff0000", 0); //red
 
-		// align game to center of screen
-		game.scale.pageAlignHorizontally = true;
-		game.scale.pageAlignVertically = true;
-		game.scale.refresh();
 	},
 	update: function() {
 		// main menu logic
@@ -67,11 +66,13 @@ Play.prototype = {
 
 		// add background & foreground assets
 		game.add.sprite(0, 0, 'sky');
-		game.add.sprite(850, (game.world.height / 2) - 200, 'sun');
-		game.add.sprite(0, game.world.height / 2, 'grass');
+		game.add.sprite(0, game.world.height / 2, 'ground');
+
+		// draw score text
+		scoreText = game.add.text(16, 16, '0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade'});
 
 		// initialize some variables
-		score = 0;
+		this.score = 0;
 		playerPos = 0;
 		playerXStart = 240;
 		playerYStart = game.world.height - 150;
@@ -91,11 +92,13 @@ Play.prototype = {
 		// arrow key input
 		cursors = game.input.keyboard.createCursorKeys();
 
-		// 
+		// set timer to spawn obstacles
 		game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 
 	},
 	update: function() {
+
+		scoreText.text = this.score;
 
 		// makes it so player is always on top layer
 		game.world.bringToTop(playerGroup);
@@ -187,12 +190,14 @@ function approach(value, valueDest, rate) {
 }
 
 function spawnAvoids() {
-	this.enemy1 = new Avoid(game, 'star', 'star', 0.2, 0, 0);
-	this.enemy2 = new Avoid(game, 'star', 'star', 0.2, 0, 1);
-	this.enemy3 = new Avoid(game, 'star', 'star', 0.2, 0, 2);
+	this.enemy1 = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, 0, playerYStart);
+	this.enemy2 = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, 1, playerYStart);
+	this.enemy3 = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, 2, playerYStart);
 	game.add.existing(this.enemy1);
 	game.add.existing(this.enemy2);
 	game.add.existing(this.enemy3);
+	
+	this.score++;
 
 	game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 }
