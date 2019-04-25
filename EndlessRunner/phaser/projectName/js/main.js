@@ -38,6 +38,11 @@ MainMenu.prototype = {
 		var subtitleText = game.add.text(16, 150, "Press SPACE to start", {fontSize: '32px', file: '#000'});
 		titleText.addColor("#ff0000", 0); //red
 		subtitleText.addColor("#ff0000", 0); //red
+
+		// align game to center of screen
+		game.scale.pageAlignHorizontally = true;
+		game.scale.pageAlignVertically = true;
+		game.scale.refresh();
 	},
 	update: function() {
 		// main menu logic
