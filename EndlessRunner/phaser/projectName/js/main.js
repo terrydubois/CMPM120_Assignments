@@ -1,5 +1,10 @@
 var game = new Phaser.Game(1152, 648, Phaser.AUTO);
 
+// declare some variables
+var player;
+var playerPos;
+var playerXStart;
+var cursors;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -56,12 +61,34 @@ Play.prototype = {
 		game.add.sprite(0, 0, 'sky');
 		game.add.sprite(0, game.world.height / 2, 'grass');
 
-		// initialize score to 0
+		// add player
+		player = game.add.sprite(0, game.world.height- 150, 'guy');
+
+		// add physics to Phaser
+		game.physics.startSystem(Phaser.Physics.ARCADE);
+		game.physics.arcade.enable(player);
+
+
+		// initialize some variables
 		score = 0;
+		playerPos = 0;
+		playerXStart = 240;
+
+		// arrow key input
+		cursors = game.input.keyboard.createCursorKeys();
 
 	},
 	update: function() {
+
+		if (game.input.keyboard.justPressed(Phaser.Keyboard.LEFT) && playerPos > 0) {
+			playerPos--;
+		}
+		else if (game.input.keyboard.justPressed(Phaser.Keyboard.RIGHT) && playerPos < 2) {
+			playerPos++;
+		}
+
 		
+		player.body.x = approach(player.body.x, playerXStart + (playerPos * 160), 8);
 	}
 }
 
@@ -95,3 +122,30 @@ game.state.add('MainMenu', MainMenu);
 game.state.add('Play', Play);
 game.state.add('GameOver', GameOver);
 game.state.start('MainMenu');
+
+
+
+
+function clamp(value, min, max) {
+
+	// clamp value between min and max, used for diamond positioning
+	if (value < min) {
+		return min;
+	}
+	if (value > max) {
+		return max;
+	}
+	return value;
+}
+
+function approach(value, valueDest, rate) {
+
+	if (value < valueDest) {
+		value += Math.abs(value - valueDest) / rate;
+	}
+	else if (value > valueDest) {
+		value -= Math.abs(value - valueDest) / rate;
+	}
+
+	return value;
+}
