@@ -4,6 +4,7 @@ var game = new Phaser.Game(1152, 648, Phaser.AUTO);
 var player;
 var playerPos;
 var playerXStart;
+var playerYStart;
 var cursors;
 var playerGroup;
 
@@ -22,6 +23,7 @@ MainMenu.prototype = {
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('dog', 'assets/img/dog.png');
 		game.load.image('guy', 'assets/img/guy.png');
+		game.load.image('sun', 'assets/img/sun.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
@@ -60,10 +62,17 @@ Play.prototype = {
 
 		// add background & foreground assets
 		game.add.sprite(0, 0, 'sky');
+		game.add.sprite(850, (game.world.height / 2) - 200, 'sun');
 		game.add.sprite(0, game.world.height / 2, 'grass');
 
+		// initialize some variables
+		score = 0;
+		playerPos = 0;
+		playerXStart = 240;
+		playerYStart = game.world.height - 150;
+
 		// add player
-		player = game.add.sprite(0, game.world.height- 150, 'guy');
+		player = game.add.sprite(playerXStart, playerYStart, 'guy');
 		playerGroup = game.add.group();
 		playerGroup.add(player);
 
@@ -72,13 +81,13 @@ Play.prototype = {
 		game.physics.arcade.enable(player);
 
 
-		// initialize some variables
-		score = 0;
-		playerPos = 0;
-		playerXStart = 240;
+
 
 		// arrow key input
 		cursors = game.input.keyboard.createCursorKeys();
+
+		// 
+		game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 
 	},
 	update: function() {
@@ -97,16 +106,19 @@ Play.prototype = {
 		// update player's x position
 		player.body.x = approach(player.body.x, playerXStart + (playerPos * 160), 8);
 
+		if (player.body.y >= playerYStart) {
+			player.body.gravity.y = 0;
+			player.body.velocity.y = 0;
+			player.body.y = playerYStart;
+		}
+		else {
+			player.body.gravity.y = 1200;
+		}
 
-
-
-		if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
-			this.enemy1 = new Avoid(game, 'star', 'star', 0.2, 0, 0);
-			this.enemy2 = new Avoid(game, 'star', 'star', 0.2, 0, 1);
-			this.enemy3 = new Avoid(game, 'star', 'star', 0.2, 0, 2);
-			game.add.existing(this.enemy1);
-			game.add.existing(this.enemy2);
-			game.add.existing(this.enemy3);
+		if ((game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)
+		|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
+		&& (player.body.y >= playerYStart)) {
+			player.body.velocity.y = -350;
 		}
 	}
 }
@@ -167,4 +179,15 @@ function approach(value, valueDest, rate) {
 	}
 
 	return value;
+}
+
+function spawnAvoids() {
+	this.enemy1 = new Avoid(game, 'star', 'star', 0.2, 0, 0);
+	this.enemy2 = new Avoid(game, 'star', 'star', 0.2, 0, 1);
+	this.enemy3 = new Avoid(game, 'star', 'star', 0.2, 0, 2);
+	game.add.existing(this.enemy1);
+	game.add.existing(this.enemy2);
+	game.add.existing(this.enemy3);
+
+	game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 }

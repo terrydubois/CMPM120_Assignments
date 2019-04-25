@@ -4,7 +4,7 @@ function Avoid(game, key, frame, scale, rotation, pos) {
 	this.pos = pos;
 
 	// set xy position of this
-	var xPos = 870 + (this.pos * 3);
+	var xPos = 900 + (this.pos * 3);
 	var yPos = game.world.height / 2;
 
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
@@ -17,7 +17,7 @@ function Avoid(game, key, frame, scale, rotation, pos) {
 	this.alpha = 1;
 
 	// set velocity of this
-	this.xVelocity = -155 - (this.pos * 30);
+	this.xVelocity = -175 + (this.pos * 50);
 	this.yVelocity = 50;
 
 	this.rate = 0;
@@ -55,7 +55,7 @@ Avoid.prototype.update = function() {
 
 
 	// change velocity of star
-	this.xVelocity -= this.rate * (25 - (this.pos * 2));
+	this.xVelocity -= this.rate * (25 - (this.pos * 3));
 	this.yVelocity += this.rate * 15;
 
 
