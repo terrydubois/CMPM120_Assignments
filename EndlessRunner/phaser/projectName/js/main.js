@@ -5,6 +5,7 @@ var player;
 var playerPos;
 var playerXStart;
 var cursors;
+var playerGroup;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -63,6 +64,8 @@ Play.prototype = {
 
 		// add player
 		player = game.add.sprite(0, game.world.height- 150, 'guy');
+		playerGroup = game.add.group();
+		playerGroup.add(player);
 
 		// add physics to Phaser
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -80,6 +83,10 @@ Play.prototype = {
 	},
 	update: function() {
 
+		// makes it so player is always on top layer
+		game.world.bringToTop(playerGroup);
+
+		// keyboard input
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.LEFT) && playerPos > 0) {
 			playerPos--;
 		}
@@ -87,8 +94,16 @@ Play.prototype = {
 			playerPos++;
 		}
 
-		
+		// update player's x position
 		player.body.x = approach(player.body.x, playerXStart + (playerPos * 160), 8);
+
+
+
+
+		if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
+			this.enemy = new Avoid(game, 'star', 'star', 0.2, 0, 0);
+			game.add.existing(this.enemy);
+		}
 	}
 }
 
