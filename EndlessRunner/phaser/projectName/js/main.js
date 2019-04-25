@@ -101,8 +101,12 @@ Play.prototype = {
 
 
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
-			this.enemy = new Avoid(game, 'star', 'star', 0.2, 0, 0);
-			game.add.existing(this.enemy);
+			this.enemy1 = new Avoid(game, 'star', 'star', 0.2, 0, 0);
+			this.enemy2 = new Avoid(game, 'star', 'star', 0.2, 0, 1);
+			this.enemy3 = new Avoid(game, 'star', 'star', 0.2, 0, 2);
+			game.add.existing(this.enemy1);
+			game.add.existing(this.enemy2);
+			game.add.existing(this.enemy3);
 		}
 	}
 }

@@ -1,13 +1,15 @@
 // avoid constructor
 function Avoid(game, key, frame, scale, rotation, pos) {
 
+	this.pos = pos;
+
 	// set xy position of this
-	var xPos = 870;
+	var xPos = 870 + (this.pos * 3);
 	var yPos = game.world.height / 2;
 
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
 
-	// set anchor point, scale, rotation for this snowflake
+	// set anchor point, scale, rotation for this obstacle
 	this.anchor.set(0.5);
 	this.scale.x = scale;
 	this.scale.y = scale;
@@ -15,7 +17,7 @@ function Avoid(game, key, frame, scale, rotation, pos) {
 	this.alpha = 1;
 
 	// set velocity of this
-	this.xVelocity = -155;
+	this.xVelocity = -155 - (this.pos * 30);
 	this.yVelocity = 50;
 
 	this.rate = 0;
@@ -44,7 +46,7 @@ Avoid.prototype.update = function() {
 
 	// grow scale of star
 	if (this.scale.x < 1) {
-		this.scale.x += this.rate / 20 ;
+		this.scale.x += this.rate / 20;
 	}
 	else {
 		this.scale.x = 1;
@@ -52,8 +54,8 @@ Avoid.prototype.update = function() {
 	this.scale.y = this.scale.x;
 
 
-	// grow scale of star
-	this.xVelocity -= this.rate * 25;
+	// change velocity of star
+	this.xVelocity -= this.rate * (25 - (this.pos * 2));
 	this.yVelocity += this.rate * 15;
 
 
