@@ -16,8 +16,9 @@ MainMenu.prototype = {
 		console.log('MainMenu: preload');
 	
 		// load game sprites
+		//sup
 		game.load.image('sky', 'assets/img/skysun.png');
-		game.load.image('ground', 'assets/img/ground.png');
+		game.load.image('ground', 'assets/img/groundnew.png');
 		game.load.image('bluedot', 'assets/img/bluedot.png');
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('dog', 'assets/img/dog.png');
