@@ -21,7 +21,7 @@ MainMenu.prototype = {
 		game.load.image('bluedot', 'assets/img/bluedot.png');
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('dog', 'assets/img/dog.png');
-		game.load.image('guy', 'assets/img/guy.png');
+		game.load.image('guy', 'assets/img/motorcycle.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
@@ -74,7 +74,7 @@ Play.prototype = {
 		// initialize some variables
 		this.score = 0;
 		playerPos = 0;
-		playerXStart = 240;
+		playerXStart = 100;
 		playerYStart = game.world.height - 150;
 
 		// add player
