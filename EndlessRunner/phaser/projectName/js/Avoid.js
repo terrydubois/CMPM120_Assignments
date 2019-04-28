@@ -17,6 +17,7 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY) {
 	this.alpha = 1;
 	this.criticalY = criticalY;
 	this.givenScore = false;
+	this.testedCollision = false;
 	this.game = game;
 
 	// set velocity of this
@@ -61,7 +62,13 @@ Avoid.prototype.update = function() {
 	this.xVelocity -= this.rate * (25 - (this.pos * 3));
 	this.yVelocity += this.rate * 15;
 
+	// test collision if at critical Y position
+	if (this.body.y >= this.criticalY && !this.testedCollision) {
+		this.testedCollision = true;
+		collisionTest(this.pos);
+	}
 	
+	// destroy this obstacle if it is out of bounds
 	if (this.body.y > game.world.height + 50) {
 		this.kill();
 	}
