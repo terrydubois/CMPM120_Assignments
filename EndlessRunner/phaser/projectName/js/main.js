@@ -25,7 +25,7 @@ MainMenu.prototype = {
 		//sup
 		game.load.image('sky', 'assets/img/skysun.png');
 		game.load.image('ground', 'assets/img/groundnew.png');
-		game.load.image('bluedot', 'assets/img/bluedot.png');
+		game.load.image('bluedot', 'assets/img/cone.png');
 		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('dog', 'assets/img/dog.png');
 		game.load.image('guy', 'assets/img/motorcycle.png');
@@ -251,7 +251,7 @@ function spawnAvoids() {
 		
 		// spawn new obstacle. add it to laneList for next check
 		if (indexInList < 0) {
-			this.enemy = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, currentLane, playerYStart + 100);	
+			this.enemy = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, currentLane, playerYStart + 80);	
 			game.add.existing(this.enemy);
 			laneList.push(currentLane);
 		}

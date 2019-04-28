@@ -21,7 +21,7 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY) {
 	this.game = game;
 
 	// set velocity of this
-	this.xVelocity = -175 + (this.pos * 50);
+	this.xVelocity = -170 + (this.pos * 50);
 	this.yVelocity = 50;
 
 	this.rate = 0;
@@ -59,7 +59,7 @@ Avoid.prototype.update = function() {
 
 
 	// change velocity of star
-	this.xVelocity -= this.rate * (25 - (this.pos * 3));
+	this.xVelocity -= this.rate * (30 - (this.pos * 5));
 	this.yVelocity += this.rate * 15;
 
 	// test collision if at critical Y position
