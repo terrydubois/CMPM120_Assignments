@@ -3,9 +3,16 @@ function Decor(game, key, frame, scale, rotation, pos, criticalY) {
 
 	this.pos = pos;
 
-	// set xy position of this
-	var xPos = 900 + (this.pos * 3);
-	var yPos = game.world.height / 2;
+	// set velocity of this
+	if (this.pos == -1) {
+		this.xVelocity = -140;
+		var xPos = 900;
+	}
+	else {
+		this.xVelocity = -10;
+		var xPos = 950;
+	}
+	var yPos = game.world.height / 2 - 30;
 
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
 
@@ -19,9 +26,7 @@ function Decor(game, key, frame, scale, rotation, pos, criticalY) {
 	this.givenScore = false;
 	this.testedCollision = false;
 	this.game = game;
-
-	// set velocity of this
-	this.xVelocity = -170 + (this.pos * 50);
+	
 	this.yVelocity = 50;
 
 	this.rate = 0;
@@ -59,14 +64,8 @@ Decor.prototype.update = function() {
 
 
 	// change velocity
-	this.xVelocity -= this.rate * (30 - (this.pos * 5));
+	this.xVelocity -= this.rate * (60 - (this.pos * 5));
 	this.yVelocity += this.rate * 15;
-
-	// test collision if at critical Y position
-	if (this.body.y >= this.criticalY && !this.testedCollision) {
-		this.testedCollision = true;
-		collisionTest(this.pos);
-	}
 	
 	// destroy this obstacle if it is out of bounds
 	if (this.body.y > game.world.height + 50) {

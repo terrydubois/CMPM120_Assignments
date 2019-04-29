@@ -29,6 +29,7 @@ MainMenu.prototype = {
 		game.load.image('dog', 'assets/img/dog.png');
 		game.load.image('guy', 'assets/img/motorcycle.png');
 		game.load.image('heart', 'assets/img/heart.png');
+		game.load.image('palm', 'assets/img/palm.png');
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
@@ -280,6 +281,12 @@ function spawnAvoids() {
 	}
 	
 	game.score++;
+
+	// spawn decor
+	this.decor1 = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
+	this.decor2 = new Decor(game, 'palm', 'palm', 0, 0, 4, playerYStart + 80);
+	game.add.existing(this.decor1);
+	game.add.existing(this.decor2);
 
 	// call this function again
 	game.time.events.repeat(Phaser.Timer.SECOND * game.spawnRate, 1, spawnAvoids, this);
