@@ -22,7 +22,6 @@ MainMenu.prototype = {
 		console.log('MainMenu: preload');
 	
 		// load game sprites
-		//sup
 		game.load.image('sky', 'assets/img/skysun.png');
 		game.load.image('ground', 'assets/img/groundnew.png');
 		game.load.image('bluedot', 'assets/img/cone.png');
@@ -33,8 +32,14 @@ MainMenu.prototype = {
 		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
 		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
 		
-		// load pop sound
-		game.load.audio('popsound', 'assets/audio/pop.mp3');
+		// load sounds
+		game.load.audio('hitSound', 'assets/audio/hit.mp3');
+		game.load.audio('pointSound', 'assets/audio/point.mp3');
+		game.load.audio('motorcycleSound', 'assets/audio/motorcycle.mp3');
+		game.load.audio('scootLeftSound', 'assets/audio/scootLeft.mp3');
+		game.load.audio('scootRightSound', 'assets/audio/scootRight.mp3');
+		game.load.audio('jumpSound', 'assets/audio/jump.mp3');
+		game.load.audio('music', 'assets/audio/music.mp3');
 
 		// align game to center of screen
 		game.scale.pageAlignHorizontally = true;
@@ -49,7 +54,6 @@ MainMenu.prototype = {
 		var subtitleText = game.add.text(16, 150, "Press SPACE to start", {fontSize: '32px', file: '#000'});
 		titleText.addColor("#ff0000", 0); //red
 		subtitleText.addColor("#ff0000", 0); //red
-
 	},
 	update: function() {
 		// main menu logic
@@ -81,7 +85,20 @@ Play.prototype = {
 		// draw score text
 		scoreText = game.add.text(16, 16, '0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
 		livesText = game.add.text(16, 60, 'Lives: 0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
-		//spawnText = game.add.text(16, 120, 'spawnRate: 0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '20px', fill: '#facade', align: 'left'});
+
+		// add sounds to game
+		hitSound = game.add.audio("hitSound");
+		scootLeftSound = game.add.audio("scootLeftSound");
+		scootRightSound = game.add.audio("scootRightSound");
+		jumpSound = game.add.audio("jumpSound");
+		pointSound = game.add.audio("pointSound");
+		music = game.add.audio("music");
+		game.add.audio("motorcycleSound");
+
+		// play music and motorcycle sound
+		music.play();
+		motorcycleSound = new Phaser.Sound(game, "motorcycleSound", 0.75, true);
+		motorcycleSound.play();
 
 		// initialize some variables
 		game.score = 0;
@@ -137,7 +154,6 @@ Play.prototype = {
 
 		scoreText.text = game.score;
 		livesText.text = "Lives: " + game.lives;
-		//spawnText.text = "spawnRate: " + game.spawnRate;
 		changeSpawnRate();
 
 		// makes it so player is always on top layer
@@ -147,10 +163,12 @@ Play.prototype = {
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.LEFT) && playerPos > 0
 		&& player.body.y >= playerYStart - 2) {
 			playerPos--;
+			scootLeftSound.play();
 		}
 		else if (game.input.keyboard.justPressed(Phaser.Keyboard.RIGHT) && playerPos < 2
 		&& player.body.y >= playerYStart - 2) {
 			playerPos++;
+			scootRightSound.play();
 		}
 
 		// update player's x position
@@ -170,6 +188,7 @@ Play.prototype = {
 		|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
 		&& (player.body.y >= playerYStart - 2)) {
 			player.body.velocity.y = -350;
+			jumpSound.play();
 		}
 	}
 }
@@ -190,6 +209,9 @@ GameOver.prototype = {
 		gameoverText1.addColor("#ff0000", 0); //red
 		gameoverText2.addColor("#ff0000", 0); //red
 		gameoverText3.addColor("#ff0000", 0); //red
+
+		music.stop();
+		motorcycleSound.stop();
 	},
 	update: function() {
 		// restart game if SPACE is pressed
@@ -269,6 +291,7 @@ function collisionTest(pos) {
 	if (pos == playerPos && player.body.y >= playerYStart - 2) {
 		game.lives--;
 		yOffset = 30;
+		hitSound.play();
 		//game.camera.shake(0.005, 200);
 	}
 
@@ -296,8 +319,11 @@ function changeSpawnRate() {
 	else if (game.score < 60) {
 		game.spawnRate = 0.75;
 	}
-	else if (game.score < 120) {
+	else if (game.score < 100) {
 		game.spawnRate = 0.65;
+	}
+	else if (game.score < 120) {
+		game.spawnRate = 0.5;
 	}
 }
 

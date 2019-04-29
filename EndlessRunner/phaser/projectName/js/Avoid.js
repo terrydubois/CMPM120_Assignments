@@ -58,7 +58,7 @@ Avoid.prototype.update = function() {
 	this.scale.y = this.scale.x;
 
 
-	// change velocity of star
+	// change velocity
 	this.xVelocity -= this.rate * (30 - (this.pos * 5));
 	this.yVelocity += this.rate * 15;
 
