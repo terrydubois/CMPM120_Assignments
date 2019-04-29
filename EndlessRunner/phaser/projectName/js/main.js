@@ -17,6 +17,7 @@ var spawnRate;
 var lives;
 var yOffset;
 var titlePlusY;
+var playerEndGame;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -53,6 +54,8 @@ MainMenu.prototype = {
 	create: function() {
 		console.log('MainMenu: create');
 
+		playerEndGame = false;
+
 		// main menu text and instructions
 		titlePlusY = 600;
 		pressedSpace = false;
@@ -61,7 +64,11 @@ MainMenu.prototype = {
 		subtitleText = game.add.text(120, 250 + titlePlusY, "Press SPACE to start", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
 
-		creditsText = game.add.text(120 - titlePlusY, 350, "Press C for credits", {fontSize: '32px', fill: '#fff'});
+		creditsText1 = game.add.text(120 - titlePlusY, 350, "Gameplay, programming, and visuals by Terry DuBois", {fontSize: '16px', fill: '#fff'});
+		creditsText2 = game.add.text(120 - titlePlusY, 380, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
+		creditsText3 = game.add.text(120 - titlePlusY, 400, "(soundcloud.com/lakeyinspired)", {fontSize: '14px', fill: '#fff'});
+		creditsText4 = game.add.text(120 - titlePlusY, 430, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
+		creditsText5 = game.add.text(120 - titlePlusY, 450, "(freesound.org/people/roman_cgr)", {fontSize: '14px', fill: '#fff'});
 		
 	},
 	update: function() {
@@ -69,8 +76,8 @@ MainMenu.prototype = {
 		// main menu logic
 
 		if (pressedSpace) {
-			titlePlusY = approach(titlePlusY, 600, 24);
-			if (titlePlusY >= 450) {
+			titlePlusY = approach(titlePlusY, 600, 20);
+			if (titlePlusY >= 550) {
 				game.state.start("Play");
 			}
 		}
@@ -85,7 +92,11 @@ MainMenu.prototype = {
 
 		titleSprite.y = 60 + titlePlusY;
 		subtitleText.y = 250 + titlePlusY;
-		creditsText.x = 120 - titlePlusY;
+		creditsText1.x = 120 - titlePlusY;
+		creditsText2.x = creditsText1.x;
+		creditsText3.x = creditsText1.x;
+		creditsText4.x = creditsText1.x;
+		creditsText5.x = creditsText1.x;
 	}
 }
 
@@ -110,7 +121,8 @@ Play.prototype = {
 
 		// draw score text
 		scoreText = game.add.text(16, 16, '0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
-		livesText = game.add.text(16, 60, 'Lives: 0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
+		livesText = game.add.text(16, 70, 'Lives: 0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
+		scoreTextPlusX = 400;
 
 		// add sounds to game
 		hitSound = game.add.audio("hitSound");
@@ -134,11 +146,14 @@ Play.prototype = {
 		yOffset = 0;
 		playerXStart = 180;
 		playerYStart = game.world.height - 150;
+		playerPlusX = 300;
+		playerPlusY = 300;
 		maxSpawn = 3;
 		palmSide = 1;
+		playerEndGame = false;
 
 		// add player
-		player = game.add.sprite(playerXStart, playerYStart, 'guy');
+		player = game.add.sprite(playerXStart - playerPlusX, playerYStart + playerPlusY, 'guy');
 		playerGroup = game.add.group();
 		playerGroup.add(player);
 
@@ -150,9 +165,6 @@ Play.prototype = {
 		game.physics.arcade.enable(groundSprite);
 		game.physics.arcade.enable(bgSprite);
 
-
-
-
 		
 		cursors = game.input.keyboard.createCursorKeys();
 
@@ -161,6 +173,21 @@ Play.prototype = {
 
 	},
 	update: function() {
+
+		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
+			game.state.start("MainMenu");
+		}
+
+		if (playerEndGame) {
+			scoreTextPlusX = approach(scoreTextPlusX, 400, 12);
+		}
+		else {
+			if (scoreTextPlusX >= 1) {
+				scoreTextPlusX = approach(scoreTextPlusX, 0, 12);
+			}
+		}
+		scoreText.x = 16 - scoreTextPlusX;
+		livesText.x = 16 - scoreTextPlusX;
 
 		// custom camera shake (so that I can shake only the Y, not the X)
 		yOffset = approach(yOffset, 0, 12);
@@ -172,13 +199,13 @@ Play.prototype = {
 			groundSprite.body.y = (game.world.height / 2) + relativeYOffset;
 			bgSprite.body.y = relativeYOffset;
 			scoreText.y = 16 + relativeYOffset;
-			livesText.y = 60 + relativeYOffset;
+			livesText.y = 80 + relativeYOffset;
 		}
 		else {
 			groundSprite.body.y = (game.world.height / 2);
 			bgSprite.body.y = 0;
 			scoreText.y = 16;
-			livesText.y = 60;
+			livesText.y = 80;
 		}
 
 		scoreText.text = game.score;
@@ -192,34 +219,57 @@ Play.prototype = {
 
 		// keyboard input
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.LEFT) && playerPos > 0
-		&& player.body.y >= playerYStart - 2) {
+		&& player.body.y >= playerYStart - 2 && !playerEndGame) {
 			playerPos--;
 			scootLeftSound.play();
 		}
 		else if (game.input.keyboard.justPressed(Phaser.Keyboard.RIGHT) && playerPos < 2
-		&& player.body.y >= playerYStart - 2) {
+		&& player.body.y >= playerYStart - 2 && !playerEndGame) {
 			playerPos++;
 			scootRightSound.play();
 		}
 
 		// update player's x position
 		playerXDest = playerXStart + (playerPos * 160);
-		player.body.x = approach(player.body.x, playerXDest, 8);
+		player.body.x = approach(player.body.x, playerXDest - playerPlusX, 8);
 
-		if (player.body.y >= playerYStart - 2) {
-			player.body.gravity.y = 0;
-			player.body.velocity.y = 0;
-			player.body.y = playerYStart - 2 + relativeYOffset + (Math.random() * 3);
+		// update player's y position
+		if (playerEndGame) {
+			player.body.velocity.y = 400;
 		}
 		else {
-			player.body.gravity.y = 1200;
+			if (player.body.y >= playerYStart - 2) {
+				player.body.gravity.y = 0;
+				player.body.velocity.y = 0;
+				player.body.y = playerYStart - 2 + relativeYOffset + (Math.random() * 3) + playerPlusY;
+			}
+			else {
+				player.body.gravity.y = 1200;
+			}
+
+			// jumping
+			if ((game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)
+			|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
+			&& (player.body.y >= playerYStart - 2)) {
+				if (playerPlusY < 2) {
+					player.body.velocity.y = -350;
+					jumpSound.play();
+				}
+			}
 		}
 
-		if ((game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)
-		|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
-		&& (player.body.y >= playerYStart - 2)) {
-			player.body.velocity.y = -350;
-			jumpSound.play();
+		if (playerEndGame) {
+			playerPlusX = approach(playerPlusX, 500, 12);
+			//playerPlusY = playerPlusX;
+			if (player.body.y >= game.world.height + 200) {
+				game.state.start("GameOver");
+			}
+		}
+		else {
+			if (playerPlusX > 0) {
+				playerPlusX = approach(playerPlusX, 0, 12);
+				playerPlusY = playerPlusX;
+			}
 		}
 	}
 }
@@ -252,7 +302,7 @@ GameOver.prototype = {
 		bgSprite = game.add.sprite(0, 0, 'sky');
 		gameoverSprite = game.add.sprite(90, 60 + gameoverPlusY, 'gameover');
 		subtitleText1 = game.add.text(120, 240 + gameoverPlusY, "Your final score: " + game.score, {fontSize: '32px', fill: '#fff'});
-		subtitleText2 = game.add.text(120, 290 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
+		subtitleText2 = game.add.text(120, 280 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
 	},
 	update: function() {
@@ -274,7 +324,7 @@ GameOver.prototype = {
 
 		gameoverSprite.y = 60 + gameoverPlusY;
 		subtitleText1.y = 240 + gameoverPlusY;
-		subtitleText2.y = 290 + gameoverPlusY;
+		subtitleText2.y = 280 + gameoverPlusY;
 	}
 }
 
@@ -370,7 +420,7 @@ function collisionTest(pos) {
 
 	if (game.lives <= 0) {
 		game.lives = 0;
-		game.time.events.repeat(Phaser.Timer.SECOND * 0.5, 1, endGame, this);
+		playerEndGame = true;
 	}
 }
 
