@@ -9,11 +9,14 @@ var playerXDest;
 var cursors;
 var playerGroup;
 var livesGroup;
+var frontDecorGroup;
+var palmSide;
 var score;
 var maxSpawn;
 var spawnRate;
 var lives;
 var yOffset;
+var titlePlusY;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -24,14 +27,12 @@ MainMenu.prototype = {
 		// load game sprites
 		game.load.image('sky', 'assets/img/skysun.png');
 		game.load.image('ground', 'assets/img/groundnew.png');
-		game.load.image('bluedot', 'assets/img/cone.png');
-		game.load.image('diamond', 'assets/img/diamond.png');
-		game.load.image('dog', 'assets/img/dog.png');
-		game.load.image('guy', 'assets/img/motorcycle.png');
+		game.load.image('cone', 'assets/img/cone.png');
+		//game.load.image('guy', 'assets/img/motorcycle.png');
 		game.load.image('heart', 'assets/img/heart.png');
 		game.load.image('palm', 'assets/img/palm.png');
-		game.load.spritesheet('dude', 'assets/img/dude.png', 32, 48);
-		game.load.spritesheet('baddie', 'assets/img/baddie.png', 32, 32);
+		game.load.image('title', 'assets/img/title.png');
+		game.load.image('gameover', 'assets/img/gameover.png');
 		
 		// load sounds
 		game.load.audio('hitSound', 'assets/audio/hit.mp3');
@@ -46,21 +47,42 @@ MainMenu.prototype = {
 		game.scale.pageAlignHorizontally = true;
 		game.scale.pageAlignVertically = true;
 		game.scale.refresh();
+
+		game.load.atlas('guy', 'assets/img/textureatlas.png', 'assets/img/sprites.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 	},
 	create: function() {
 		console.log('MainMenu: create');
 
 		// main menu text and instructions
-		var titleText = game.add.text(16, 100, "terry's endless runner", {fontSize: '32px', file: '#000'});
-		var subtitleText = game.add.text(16, 150, "Press SPACE to start", {fontSize: '32px', file: '#000'});
-		titleText.addColor("#ff0000", 0); //red
-		subtitleText.addColor("#ff0000", 0); //red
+		titlePlusY = 600;
+		pressedSpace = false;
+		bgSprite = game.add.sprite(0, 0, 'sky');
+		titleSprite = game.add.sprite(90, 60 + titlePlusY, 'title');
+		subtitleText = game.add.text(120, 250 + titlePlusY, "Press SPACE to start", {fontSize: '32px', fill: '#fff'});
+		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
+		
 	},
 	update: function() {
+
 		// main menu logic
-		if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			game.state.start('Play');
+
+		if (pressedSpace) {
+			titlePlusY = approach(titlePlusY, 600, 24);
+			if (titlePlusY >= 450) {
+				game.state.start("Play");
+			}
 		}
+		else {
+			titlePlusY = approach(titlePlusY, 0, 12);
+			if (titlePlusY < 20) {
+				if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
+					pressedSpace = true;
+				}
+			}
+		}
+
+		titleSprite.y = 60 + titlePlusY;
+		subtitleText.y = 250 + titlePlusY;
 	}
 }
 
@@ -110,11 +132,14 @@ Play.prototype = {
 		playerXStart = 180;
 		playerYStart = game.world.height - 150;
 		maxSpawn = 3;
+		palmSide = 1;
 
 		// add player
 		player = game.add.sprite(playerXStart, playerYStart, 'guy');
 		playerGroup = game.add.group();
 		playerGroup.add(player);
+
+		frontDecorGroup = game.add.group();
 
 		// add physics to Phaser
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -159,6 +184,8 @@ Play.prototype = {
 
 		// makes it so player is always on top layer
 		game.world.bringToTop(playerGroup);
+		game.world.bringToTop(frontDecorGroup);
+		
 
 		// keyboard input
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.LEFT) && playerPos > 0
@@ -204,21 +231,45 @@ GameOver.prototype = {
 		console.log('GameOver: create');
 
 		// display text on gameover screen
+		/*
 		var gameoverText1 = game.add.text(16, 100, "GAME OVER!", {fontSize: '32px', file: '#000'});
 		var gameoverText2 = game.add.text(16, 150, "Your final score: " + game.score, {fontSize: '32px', file: '#000'});
 		var gameoverText3 = game.add.text(16, 200, 'Press SPACE to restart!', {fontSize: '32px', file: '#000'});
 		gameoverText1.addColor("#ff0000", 0); //red
 		gameoverText2.addColor("#ff0000", 0); //red
 		gameoverText3.addColor("#ff0000", 0); //red
+		*/
 
 		music.stop();
 		motorcycleSound.stop();
+
+		// gameover text and instructions
+		gameoverPlusY = 600;
+		pressedSpace = false;
+		bgSprite = game.add.sprite(0, 0, 'sky');
+		gameoverSprite = game.add.sprite(90, 60 + gameoverPlusY, 'gameover');
+		subtitleText = game.add.text(120, 250 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
+		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
 	},
 	update: function() {
-		// restart game if SPACE is pressed
-		if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			game.state.start('MainMenu');
+
+		if (pressedSpace) {
+			gameoverPlusY = approach(gameoverPlusY, 600, 24);
+			if (gameoverPlusY >= 450) {
+				game.state.start("Play");
+			}
 		}
+		else {
+			gameoverPlusY = approach(gameoverPlusY, 0, 12);
+			if (gameoverPlusY < 20) {
+				if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
+					pressedSpace = true;
+				}
+			}
+		}
+
+		gameoverSprite.y = 60 + gameoverPlusY;
+		subtitleText.y = 250 + gameoverPlusY;
 	}
 }
 
@@ -233,7 +284,7 @@ game.state.start('MainMenu');
 
 function clamp(value, min, max) {
 
-	// clamp value between min and max, used for diamond positioning
+	// clamp value between min and max
 	if (value < min) {
 		return min;
 	}
@@ -274,7 +325,7 @@ function spawnAvoids() {
 		
 		// spawn new obstacle. add it to laneList for next check
 		if (indexInList < 0) {
-			this.enemy = new Avoid(game, 'bluedot', 'bluedot', 0.2, 0, currentLane, playerYStart + 80);	
+			this.enemy = new Avoid(game, 'cone', 'cone', 0.2, 0, currentLane, playerYStart + 80);	
 			game.add.existing(this.enemy);
 			laneList.push(currentLane);
 		}
@@ -283,10 +334,20 @@ function spawnAvoids() {
 	game.score++;
 
 	// spawn decor
-	this.decor1 = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
-	this.decor2 = new Decor(game, 'palm', 'palm', 0, 0, 4, playerYStart + 80);
-	game.add.existing(this.decor1);
-	game.add.existing(this.decor2);
+	//this.decor1 = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
+
+	if (palmSide < 0) {
+		this.decor = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
+		game.add.existing(this.decor);
+	}
+	else {
+		this.decor = new Decor(game, 'palm', 'palm', 0, 0, 4, playerYStart + 80);
+		frontDecorGroup.add(this.decor);
+	}
+	palmSide *= -1;
+
+	
+	//game.add.existing(this.decor2);
 
 	// call this function again
 	game.time.events.repeat(Phaser.Timer.SECOND * game.spawnRate, 1, spawnAvoids, this);

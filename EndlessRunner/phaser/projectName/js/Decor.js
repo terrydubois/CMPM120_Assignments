@@ -5,12 +5,12 @@ function Decor(game, key, frame, scale, rotation, pos, criticalY) {
 
 	// set velocity of this
 	if (this.pos == -1) {
-		this.xVelocity = -140;
+		this.xVelocity = -120;
 		var xPos = 900;
 	}
 	else {
-		this.xVelocity = -10;
-		var xPos = 950;
+		this.xVelocity = 0;
+		var xPos = 925;
 	}
 	var yPos = game.world.height / 2 - 30;
 
@@ -64,7 +64,12 @@ Decor.prototype.update = function() {
 
 
 	// change velocity
-	this.xVelocity -= this.rate * (60 - (this.pos * 5));
+	if (this.pos == -1) {
+		this.xVelocity -= (this.rate * 95);
+	}
+	else {
+		this.xVelocity -= this.rate * (60 - (this.pos * 7));
+	}
 	this.yVelocity += this.rate * 15;
 	
 	// destroy this obstacle if it is out of bounds
