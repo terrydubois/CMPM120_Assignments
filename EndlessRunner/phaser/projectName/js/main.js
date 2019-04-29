@@ -60,6 +60,8 @@ MainMenu.prototype = {
 		titleSprite = game.add.sprite(90, 60 + titlePlusY, 'title');
 		subtitleText = game.add.text(120, 250 + titlePlusY, "Press SPACE to start", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
+
+		creditsText = game.add.text(120 - titlePlusY, 350, "Press C for credits", {fontSize: '32px', fill: '#fff'});
 		
 	},
 	update: function() {
@@ -83,6 +85,7 @@ MainMenu.prototype = {
 
 		titleSprite.y = 60 + titlePlusY;
 		subtitleText.y = 250 + titlePlusY;
+		creditsText.x = 120 - titlePlusY;
 	}
 }
 
@@ -248,7 +251,8 @@ GameOver.prototype = {
 		pressedSpace = false;
 		bgSprite = game.add.sprite(0, 0, 'sky');
 		gameoverSprite = game.add.sprite(90, 60 + gameoverPlusY, 'gameover');
-		subtitleText = game.add.text(120, 250 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
+		subtitleText1 = game.add.text(120, 240 + gameoverPlusY, "Your final score: " + game.score, {fontSize: '32px', fill: '#fff'});
+		subtitleText2 = game.add.text(120, 290 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
 	},
 	update: function() {
@@ -269,7 +273,8 @@ GameOver.prototype = {
 		}
 
 		gameoverSprite.y = 60 + gameoverPlusY;
-		subtitleText.y = 250 + gameoverPlusY;
+		subtitleText1.y = 240 + gameoverPlusY;
+		subtitleText2.y = 290 + gameoverPlusY;
 	}
 }
 
