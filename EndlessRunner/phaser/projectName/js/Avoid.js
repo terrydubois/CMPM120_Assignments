@@ -1,5 +1,5 @@
 // avoid constructor
-function Avoid(game, key, frame, scale, rotation, pos, criticalY) {
+function Avoid(game, key, frame, scale, rotation, pos, criticalY, bad) {
 
 	this.pos = pos;
 
@@ -19,6 +19,7 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY) {
 	this.givenScore = false;
 	this.testedCollision = false;
 	this.game = game;
+	this.bad = bad;
 
 	// set velocity of this
 	this.xVelocity = -170 + (this.pos * 50);
@@ -65,7 +66,7 @@ Avoid.prototype.update = function() {
 	// test collision if at critical Y position
 	if (this.body.y >= this.criticalY && !this.testedCollision) {
 		this.testedCollision = true;
-		collisionTest(this.pos);
+		collisionTest(this.pos, this.bad);
 	}
 	
 	// destroy this obstacle if it is out of bounds

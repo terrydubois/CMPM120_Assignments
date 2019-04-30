@@ -21,11 +21,12 @@ var titlePlusY;
 var playerEndGame;
 var highscore;
 
-// define menu state and methods
-var MainMenu = function(game) {};
-MainMenu.prototype = {
+
+// define logo state and methods
+var LogoScreen = function(game) {};
+LogoScreen.prototype = {
 	preload: function() {
-		console.log('MainMenu: preload');
+		console.log('LogoScreen: preload');
 	
 		// load game sprites
 		game.load.image('sky', 'assets/img/skysun.png');
@@ -37,6 +38,8 @@ MainMenu.prototype = {
 		game.load.image('gameover', 'assets/img/gameover.png');
 		game.load.image('barFill', 'assets/img/barFill.png');
 		game.load.image('barOutline', 'assets/img/barOutline.png');
+		game.load.image('logo', 'assets/img/logo.png');
+		game.load.image('whiteout', 'assets/img/whiteout.png');
 		
 		// load sounds
 		game.load.audio('hitSound', 'assets/audio/hit.mp3');
@@ -54,6 +57,43 @@ MainMenu.prototype = {
 
 		game.load.atlas('guy', 'assets/img/textureatlas.png', 'assets/img/sprites.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 		game.load.atlas('roadpaint', 'assets/img/roadpaint_anim.png', 'assets/img/roadpaint_anim.json');
+	},
+	create: function() {
+		console.log('LogoScreen: create');
+
+		logoScreenTimer = 120;
+
+		game.add.sprite(0, 0, "logo");
+		whiteoutSprite = game.add.sprite(0, 0, "whiteout");
+		whiteoutSprite.alpha = 0;
+	},
+	update: function() {
+
+		logoScreenTimer--;
+		if (logoScreenTimer <= 0) {
+			if (whiteoutSprite.alpha < 1) {
+				whiteoutSprite.alpha += 0.05;
+			}
+			else {
+				whiteoutSprite.alpha = 1;
+				game.state.start("MainMenu");
+			}
+		}
+
+	}
+}
+
+
+
+
+
+
+// define menu state and methods
+var MainMenu = function(game) {};
+MainMenu.prototype = {
+	preload: function() {
+		console.log('MainMenu: preload');
+	
 	},
 	create: function() {
 		console.log('MainMenu: create');
@@ -76,15 +116,24 @@ MainMenu.prototype = {
 
 
 		creditsText1 = game.add.text(120 - titlePlusY, 350, "Gameplay, programming, and visuals by Terry DuBois", {fontSize: '16px', fill: '#fff'});
-		creditsText2 = game.add.text(120 - titlePlusY, 380, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
-		creditsText3 = game.add.text(120 - titlePlusY, 400, "(soundcloud.com/lakeyinspired)", {fontSize: '14px', fill: '#fff'});
-		creditsText4 = game.add.text(120 - titlePlusY, 430, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
-		creditsText5 = game.add.text(120 - titlePlusY, 450, "(freesound.org/people/roman_cgr)", {fontSize: '14px', fill: '#fff'});
+		creditsText2 = game.add.text(120 - titlePlusY, 390, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
+		creditsText3 = game.add.text(120 - titlePlusY, 410, "soundcloud.com/lakeyinspired", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
+		creditsText4 = game.add.text(120 - titlePlusY, 440, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
+		creditsText5 = game.add.text(120 - titlePlusY, 460, "freesound.org/people/roman_cgr", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
 		
 
 		game.highscore = 0;
+
+		whiteoutSprite = game.add.sprite(0, 0, "whiteout");
 	},
 	update: function() {
+
+		if (whiteoutSprite.alpha > 0) {
+			whiteoutSprite.alpha -= 0.04;
+		}
+		else {
+			whiteoutSprite.alpha = 0;
+		}
 
 		// main menu logic
 		if (pressedSpace) {
@@ -111,6 +160,14 @@ MainMenu.prototype = {
 		creditsText5.x = creditsText1.x;
 	}
 }
+
+
+
+
+
+
+
+
 
 // define gameplay state and methods
 var Play = function(game) {};
@@ -178,7 +235,7 @@ Play.prototype = {
 		playerPlusX = 300;
 		playerPlusY = 300;
 		maxSpawn = 3;
-		palmSide = 1;
+		palmSide = 0;
 		playerEndGame = false;
 		jumpPower = 0;
 		spawnsSinceTriple = 0;
@@ -406,10 +463,11 @@ GameOver.prototype = {
 }
 
 // add states to StateManager
+game.state.add('LogoScreen', LogoScreen);
 game.state.add('MainMenu', MainMenu);
 game.state.add('Play', Play);
 game.state.add('GameOver', GameOver);
-game.state.start('MainMenu');
+game.state.start('LogoScreen');
 
 
 
@@ -460,7 +518,7 @@ function spawnAvoids() {
 		
 		// spawn new obstacle. add it to laneList for next check
 		if (indexInList < 0) {
-			this.enemy = new Avoid(game, 'cone', 'cone', 0.2, 0, currentLane, playerYStart + 80);	
+			this.enemy = new Avoid(game, 'cone', 'cone', 0.2, 0, currentLane, playerYStart + 80, true);	
 			game.add.existing(this.enemy);
 			laneList.push(currentLane);
 		}
@@ -479,66 +537,90 @@ function spawnAvoids() {
 	// spawn decor
 	//this.decor1 = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
 
-	if (palmSide < 0) {
+	if (palmSide == 1) {
 		this.decor = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
 		game.add.existing(this.decor);
+	}
+	else if (palmSide == 2) {
+		game.time.events.repeat(Phaser.Timer.SECOND * (game.spawnRate / 2), 1, spawnPoint, this);
 	}
 	else {
 		this.decor = new Decor(game, 'palm', 'palm', 0, 0, 4, playerYStart + 80);
 		frontDecorGroup.add(this.decor);
 	}
-	palmSide *= -1;
+
+	palmSide++;
+	if (palmSide > 2) {
+		palmSide = 0;
+	}
 
 
 	// call this function again
 	game.time.events.repeat(Phaser.Timer.SECOND * game.spawnRate, 1, spawnAvoids, this);
 }
 
-function collisionTest(pos) {
-
-	// decrement lives if player hits an obstacle
-	if (pos == playerPos && player.body.y >= playerYStart - 2) {
-		game.lives--;
-		yOffset = 30;
-		hitSound.play();
-
-		player.body.velocity.y = -100;
+function spawnPoint() {
+	currentLane = playerPos + 1;
+	if (currentLane > 2) {
+		currentLane = 0;
 	}
 
-	if (game.lives <= 0) {
-		game.lives = 0;
-		playerEndGame = true;
+	this.point = new Avoid(game, 'heart', 'heart', 0.2, 0, currentLane, playerYStart + 80, false);	
+	game.add.existing(this.point);
+}
+
+function collisionTest(pos, bad) {
+
+	if (pos == playerPos && player.body.y >= playerYStart - 2) {
+
+		if (bad) {
+
+			// decrement lives if player hits an obstacle
+			game.lives--;
+			yOffset = 30;
+			hitSound.play();
+
+			player.body.velocity.y = -100;
+			
+
+			if (game.lives <= 0) {
+				game.lives = 0;
+				playerEndGame = true;
+			}
+		}
+		else {
+
+			game.score += 5;
+			pointSound.play();
+		}
 	}
 }
 
 function changeSpawnRate() {
 
 	// decrease time between spawns as player scores go up
-	if (game.score < 10) {
-		game.spawnRate = 1;
-	}
-	else if (game.score < 20) {
-		game.spawnRate = 0.9;
-	}
-	else if (game.score < 30) {
-		game.spawnRate = 0.8;
-	}
-	else if (game.score < 0.7) {
-		game.spawnRate = 1;
-	}
-	else if (game.score < 60) {
-		game.spawnRate = 0.6;
+	if (game.score < 50) {
+		game.spawnRate = 1.3;
 	}
 	else if (game.score < 100) {
+		game.spawnRate = 1.15;
+	}
+	else if (game.score < 150) {
+		game.spawnRate = 1;
+	}
+	else if (game.score < 200) {
+		game.spawnRate = 0.9;
+	}
+	else if (game.score < 250) {
+		game.spawnRate = 0.8;
+	}
+	else if (game.score < 300) {
+		game.spawnRate = 0.7;
+	}
+	else if (game.score < 350) {
+		game.spawnRate = 0.6;
+	}
+	else {
 		game.spawnRate = 0.5;
 	}
-	/*
-	else if (game.score < 120) {
-		game.spawnRate = 0.5;
-	}
-	*/
-}
-
-function endGame() {
-	game.state.start("GameOver");
 }
