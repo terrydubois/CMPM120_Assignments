@@ -15,9 +15,11 @@ var score;
 var maxSpawn;
 var spawnRate;
 var lives;
+var heartSprite;
 var yOffset;
 var titlePlusY;
 var playerEndGame;
+var highscore;
 
 // define menu state and methods
 var MainMenu = function(game) {};
@@ -33,7 +35,8 @@ MainMenu.prototype = {
 		game.load.image('palm', 'assets/img/palm.png');
 		game.load.image('title', 'assets/img/title.png');
 		game.load.image('gameover', 'assets/img/gameover.png');
-		game.load.image('bar', 'assets/img/bar.png');
+		game.load.image('barFill', 'assets/img/barFill.png');
+		game.load.image('barOutline', 'assets/img/barOutline.png');
 		
 		// load sounds
 		game.load.audio('hitSound', 'assets/audio/hit.mp3');
@@ -78,6 +81,8 @@ MainMenu.prototype = {
 		creditsText4 = game.add.text(120 - titlePlusY, 430, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
 		creditsText5 = game.add.text(120 - titlePlusY, 450, "(freesound.org/people/roman_cgr)", {fontSize: '14px', fill: '#fff'});
 		
+
+		game.highscore = 0;
 	},
 	update: function() {
 
@@ -132,10 +137,21 @@ Play.prototype = {
 		roadPaint.animations.play("roadpaint_anim");
 		roadPaint.alpha = 0.5;
 
+		// jump-bar
+		barFill = game.add.sprite(16, 150, "barFill");
+		barOutline = game.add.sprite(16, 150, "barOutline");
+
 		// draw score text
-		scoreText = game.add.text(16, 16, '0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
-		livesText = game.add.text(16, 70, 'Lives: 0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
+		scoreText1 = game.add.text(16, 16, 'SCORE:', {fontStyle: 'italic', fontSize: '20px', fill: '#facade', align: 'left'});
+		scoreText2 = game.add.text(60, 16, '0', {fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
+		jumpText = game.add.text(16, 180, "JUMP", {fontSize: '25px', fontStyle: 'italic', fill: '#fff'});
 		scoreTextPlusX = 400;
+
+		// hearts for lives
+		heartSprite = [];
+		for (var i = 0; i < game.lives; i++) {
+			heartSprite[i] = game.add.sprite(24 + (i * 64), 80, "heart");
+		}
 
 		// add sounds to game
 		hitSound = game.add.audio("hitSound");
@@ -164,6 +180,8 @@ Play.prototype = {
 		maxSpawn = 3;
 		palmSide = 1;
 		playerEndGame = false;
+		jumpPower = 0;
+		spawnsSinceTriple = 0;
 
 		// add player
 		player = game.add.sprite(playerXStart - playerPlusX, playerYStart + playerPlusY, 'guy');
@@ -184,15 +202,12 @@ Play.prototype = {
 		// set timer to spawn obstacles
 		game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 
-
-		healthbar = this.game.add.sprite(0,0,'bar');
-		
-
 	},
 	update: function() {
 
-		healthbar.width = Math.random() * healthbar.width;
-		
+		barFill.width = jumpPower * barOutline.width;
+		jumpPower += 0.002;
+		jumpPower = Math.min(jumpPower, 1);
 
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
 			game.state.start("MainMenu");
@@ -206,8 +221,11 @@ Play.prototype = {
 				scoreTextPlusX = approach(scoreTextPlusX, 0, 12);
 			}
 		}
-		scoreText.x = 16 - scoreTextPlusX;
-		livesText.x = 16 - scoreTextPlusX;
+		scoreText1.x = 24 - scoreTextPlusX;
+		scoreText2.x = 120 - scoreTextPlusX;
+		jumpText.x = 80 - scoreTextPlusX;
+		barOutline.x = 16 - scoreTextPlusX;
+		barFill.x = barOutline.x + 2;
 
 		// custom camera shake (so that I can shake only the Y, not the X)
 		yOffset = approach(yOffset, 0, 12);
@@ -218,18 +236,38 @@ Play.prototype = {
 			}
 			groundSprite.body.y = (game.world.height / 2) + relativeYOffset;
 			bgSprite.body.y = relativeYOffset;
-			scoreText.y = 16 + relativeYOffset;
-			livesText.y = 80 + relativeYOffset;
+			scoreText1.y = 115 + relativeYOffset;
+			scoreText2.y = 83 + relativeYOffset;
+			jumpText.y = 165 + relativeYOffset;
+			barOutline.y = 150 + relativeYOffset;
 		}
 		else {
 			groundSprite.body.y = (game.world.height / 2);
 			bgSprite.body.y = 0;
-			scoreText.y = 16;
-			livesText.y = 80;
+			scoreText1.y = 115;
+			scoreText2.y = 83;
+			jumpText.y = 165;
+			barOutline.y = 150;
+		}
+		barFill.y = barOutline.y;
+
+		for (var i = 0; i < 3; i++) {
+			if (game.lives < i + 1) {
+				heartSprite[i].kill();
+			}
+			else {
+				heartSprite[i].x = 24 + (i * 58) - scoreTextPlusX;
+				if (yOffset > 3) {
+					heartSprite[i].y = 30 + relativeYOffset;
+				}
+				else {
+					heartSprite[i].y = 30;
+				}
+			}
 		}
 
-		scoreText.text = game.score;
-		livesText.text = "Lives: " + game.lives;
+		scoreText1.text = "SCORE: ";
+		scoreText2.text = game.score;
 		changeSpawnRate();
 
 		// makes it so player is always on top layer
@@ -268,13 +306,24 @@ Play.prototype = {
 			}
 
 			// jumping
-			if ((game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)
-			|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
-			&& (player.body.y >= playerYStart - 2)) {
-				if (playerPlusY < 2) {
-					player.body.velocity.y = -350;
-					jumpSound.play();
+			if (jumpPower < 1) {
+				maxSpawn = 2;
+			}
+			else {
+				maxSpawn = 3;
+				if ((game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)
+				|| game.input.keyboard.justPressed(Phaser.Keyboard.UP))
+				&& (player.body.y >= playerYStart - 2)) {
+					if (playerPlusY < 2) {
+						player.body.velocity.y = -350;
+						jumpSound.play();
+						jumpPower = 0;
+					}
 				}
+			}
+
+			if (spawnsSinceTriple < 4) {
+				maxSpawn = 2;
 			}
 		}
 
@@ -303,15 +352,9 @@ GameOver.prototype = {
 	create: function() {
 		console.log('GameOver: create');
 
-		// display text on gameover screen
-		/*
-		var gameoverText1 = game.add.text(16, 100, "GAME OVER!", {fontSize: '32px', file: '#000'});
-		var gameoverText2 = game.add.text(16, 150, "Your final score: " + game.score, {fontSize: '32px', file: '#000'});
-		var gameoverText3 = game.add.text(16, 200, 'Press SPACE to restart!', {fontSize: '32px', file: '#000'});
-		gameoverText1.addColor("#ff0000", 0); //red
-		gameoverText2.addColor("#ff0000", 0); //red
-		gameoverText3.addColor("#ff0000", 0); //red
-		*/
+		if (game.score > game.highscore) {
+			game.highscore = game.score;
+		}
 
 		music.stop();
 		motorcycleSound.stop();
@@ -324,6 +367,7 @@ GameOver.prototype = {
 		subtitleText1 = game.add.text(120, 240 + gameoverPlusY, "Your final score: " + game.score, {fontSize: '32px', fill: '#fff'});
 		subtitleText2 = game.add.text(120, 280 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
+		highscoreText = game.add.text(120 - gameoverPlusY, 350, "Your highscore: " + game.highscore, {fontSize: '16px', fill: '#fff'});
 
 		// roadpaint animation
 		roadPaint = game.add.sprite(0, game.world.height / 2, "roadpaint");
@@ -332,6 +376,10 @@ GameOver.prototype = {
 		roadPaint.alpha = 0.5;
 	},
 	update: function() {
+
+		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
+			game.state.start("MainMenu");
+		}
 
 		if (pressedSpace) {
 			gameoverPlusY = approach(gameoverPlusY, 600, 24);
@@ -351,6 +399,7 @@ GameOver.prototype = {
 		gameoverSprite.y = 60 + gameoverPlusY;
 		subtitleText1.y = 240 + gameoverPlusY;
 		subtitleText2.y = 280 + gameoverPlusY;
+		highscoreText.x = 120 - gameoverPlusY;
 	}
 }
 
@@ -394,6 +443,9 @@ function spawnAvoids() {
 	for (var i = 0; i < maxSpawn; i++) {
 
 		var currentLane = Math.floor(Math.random() * 3);
+		if (i == 0) {
+			currentLane = playerPos;
+		}
 		var indexInList = -1;
 
 		// check to make sure we don't spawn more than 1
@@ -411,6 +463,14 @@ function spawnAvoids() {
 			laneList.push(currentLane);
 		}
 	}
+
+	if (laneList.length < 3) {
+		spawnsSinceTriple++;
+	}
+	else {
+		spawnsSinceTriple = 0;
+	}
+	console.log("spawnsSinceTriple: " + spawnsSinceTriple);
 	
 	game.score++;
 
@@ -439,7 +499,8 @@ function collisionTest(pos) {
 		game.lives--;
 		yOffset = 30;
 		hitSound.play();
-		//game.camera.shake(0.005, 200);
+
+		player.body.velocity.y = -100;
 	}
 
 	if (game.lives <= 0) {
@@ -452,26 +513,28 @@ function changeSpawnRate() {
 
 	// decrease time between spawns as player scores go up
 	if (game.score < 10) {
-		game.spawnRate = 1.6;
+		game.spawnRate = 1;
 	}
 	else if (game.score < 20) {
-		game.spawnRate = 1.5;
+		game.spawnRate = 0.9;
 	}
 	else if (game.score < 30) {
-		game.spawnRate = 1.25;
+		game.spawnRate = 0.8;
 	}
-	else if (game.score < 45) {
+	else if (game.score < 0.7) {
 		game.spawnRate = 1;
 	}
 	else if (game.score < 60) {
-		game.spawnRate = 0.75;
+		game.spawnRate = 0.6;
 	}
 	else if (game.score < 100) {
-		game.spawnRate = 0.65;
+		game.spawnRate = 0.5;
 	}
+	/*
 	else if (game.score < 120) {
 		game.spawnRate = 0.5;
 	}
+	*/
 }
 
 function endGame() {
