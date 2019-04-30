@@ -210,6 +210,8 @@ Play.prototype = {
 		jumpPower = Math.min(jumpPower, 1);
 
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
+			music.stop();
+			motorcycleSound.stop();
 			game.state.start("MainMenu");
 		}
 
