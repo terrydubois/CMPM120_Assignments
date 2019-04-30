@@ -27,13 +27,13 @@ MainMenu.prototype = {
 	
 		// load game sprites
 		game.load.image('sky', 'assets/img/skysun.png');
-		game.load.image('ground', 'assets/img/groundnew.png');
+		game.load.image('ground', 'assets/img/groundnew_nolines.png');
 		game.load.image('cone', 'assets/img/cone.png');
-		//game.load.image('guy', 'assets/img/motorcycle.png');
 		game.load.image('heart', 'assets/img/heart.png');
 		game.load.image('palm', 'assets/img/palm.png');
 		game.load.image('title', 'assets/img/title.png');
 		game.load.image('gameover', 'assets/img/gameover.png');
+		game.load.image('bar', 'assets/img/bar.png');
 		
 		// load sounds
 		game.load.audio('hitSound', 'assets/audio/hit.mp3');
@@ -50,6 +50,7 @@ MainMenu.prototype = {
 		game.scale.refresh();
 
 		game.load.atlas('guy', 'assets/img/textureatlas.png', 'assets/img/sprites.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+		game.load.atlas('roadpaint', 'assets/img/roadpaint_anim.png', 'assets/img/roadpaint_anim.json');
 	},
 	create: function() {
 		console.log('MainMenu: create');
@@ -64,6 +65,13 @@ MainMenu.prototype = {
 		subtitleText = game.add.text(120, 250 + titlePlusY, "Press SPACE to start", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
 
+		// roadpaint animation
+		roadPaint = game.add.sprite(0, game.world.height / 2, "roadpaint");
+		roadPaint.animations.add("roadpaint_anim", Phaser.Animation.generateFrameNames("Comp 2_", 0, 29, "", 5), 60, true);
+		roadPaint.animations.play("roadpaint_anim");
+		roadPaint.alpha = 0.5;
+
+
 		creditsText1 = game.add.text(120 - titlePlusY, 350, "Gameplay, programming, and visuals by Terry DuBois", {fontSize: '16px', fill: '#fff'});
 		creditsText2 = game.add.text(120 - titlePlusY, 380, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
 		creditsText3 = game.add.text(120 - titlePlusY, 400, "(soundcloud.com/lakeyinspired)", {fontSize: '14px', fill: '#fff'});
@@ -74,7 +82,6 @@ MainMenu.prototype = {
 	update: function() {
 
 		// main menu logic
-
 		if (pressedSpace) {
 			titlePlusY = approach(titlePlusY, 600, 20);
 			if (titlePlusY >= 550) {
@@ -118,6 +125,12 @@ Play.prototype = {
 		// add background & foreground assets
 		bgSprite = game.add.sprite(0, 0, 'sky');
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
+
+		// roadpaint animation
+		roadPaint = game.add.sprite(0, game.world.height / 2, "roadpaint");
+		roadPaint.animations.add("roadpaint_anim", Phaser.Animation.generateFrameNames("Comp 2_", 0, 29, "", 5), 60, true);
+		roadPaint.animations.play("roadpaint_anim");
+		roadPaint.alpha = 0.5;
 
 		// draw score text
 		scoreText = game.add.text(16, 16, '0', {font: 'Trebuchet MS', fontStyle: 'italic', fontSize: '60px', fill: '#facade', align: 'left'});
@@ -171,8 +184,15 @@ Play.prototype = {
 		// set timer to spawn obstacles
 		game.time.events.repeat(Phaser.Timer.SECOND * 1, 1, spawnAvoids, this);
 
+
+		healthbar = this.game.add.sprite(0,0,'bar');
+		
+
 	},
 	update: function() {
+
+		healthbar.width = Math.random() * healthbar.width;
+		
 
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
 			game.state.start("MainMenu");
@@ -304,6 +324,12 @@ GameOver.prototype = {
 		subtitleText1 = game.add.text(120, 240 + gameoverPlusY, "Your final score: " + game.score, {fontSize: '32px', fill: '#fff'});
 		subtitleText2 = game.add.text(120, 280 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
+
+		// roadpaint animation
+		roadPaint = game.add.sprite(0, game.world.height / 2, "roadpaint");
+		roadPaint.animations.add("roadpaint_anim", Phaser.Animation.generateFrameNames("Comp 2_", 0, 29, "", 5), 60, true);
+		roadPaint.animations.play("roadpaint_anim");
+		roadPaint.alpha = 0.5;
 	},
 	update: function() {
 
@@ -401,8 +427,6 @@ function spawnAvoids() {
 	}
 	palmSide *= -1;
 
-	
-	//game.add.existing(this.decor2);
 
 	// call this function again
 	game.time.events.repeat(Phaser.Timer.SECOND * game.spawnRate, 1, spawnAvoids, this);
