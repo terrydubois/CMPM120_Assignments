@@ -126,10 +126,11 @@ MainMenu.prototype = {
 
 
 		creditsText1 = game.add.text(120 - titlePlusY, 350, "Gameplay, programming, and visuals by Terry DuBois", {fontSize: '16px', fill: '#fff'});
-		creditsText2 = game.add.text(120 - titlePlusY, 390, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
-		creditsText3 = game.add.text(120 - titlePlusY, 410, "soundcloud.com/lakeyinspired", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
-		creditsText4 = game.add.text(120 - titlePlusY, 440, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
-		creditsText5 = game.add.text(120 - titlePlusY, 460, "freesound.org/people/roman_cgr", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
+		creditsText6 = game.add.text(120 - titlePlusY, 370, "terrydubois.io", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
+		creditsText2 = game.add.text(120 - titlePlusY, 400, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
+		creditsText3 = game.add.text(120 - titlePlusY, 420, "soundcloud.com/lakeyinspired", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
+		creditsText4 = game.add.text(120 - titlePlusY, 460, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
+		creditsText5 = game.add.text(120 - titlePlusY, 480, "freesound.org/people/roman_cgr", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
 		
 
 		game.highscore = 0;
@@ -168,6 +169,7 @@ MainMenu.prototype = {
 		creditsText3.x = creditsText1.x;
 		creditsText4.x = creditsText1.x;
 		creditsText5.x = creditsText1.x;
+		creditsText6.x = creditsText1.x;
 	}
 }
 
