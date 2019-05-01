@@ -21,6 +21,9 @@ var titlePlusY;
 var playerEndGame;
 var highscore;
 
+var help;
+var helpWait;
+
 
 // define logo state and methods
 var LogoScreen = function(game) {};
@@ -66,6 +69,9 @@ LogoScreen.prototype = {
 		game.add.sprite(0, 0, "logo");
 		whiteoutSprite = game.add.sprite(0, 0, "whiteout");
 		whiteoutSprite.alpha = 0;
+
+		game.help = 0;
+		game.helpMax = 3;
 	},
 	update: function() {
 
@@ -78,6 +84,10 @@ LogoScreen.prototype = {
 				whiteoutSprite.alpha = 1;
 				game.state.start("MainMenu");
 			}
+		}
+
+		if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
+			logoScreenTimer = 0;
 		}
 
 	}
@@ -204,6 +214,13 @@ Play.prototype = {
 		jumpText = game.add.text(16, 180, "JUMP", {fontSize: '25px', fontStyle: 'italic', fill: '#fff'});
 		scoreTextPlusX = 400;
 
+		// initialize help stuff
+		game.helpX = (game.world.width / 2) + 100;
+		game.helpY = (game.world.height / 2) - 120;
+		game.helpAlpha = 0;
+		game.helpWait = 360;
+		game.helpText = game.add.text(16, 180, "Use LEFT and RIGHT to move", {fontSize: '30px', align: 'center', fontStyle: 'italic', fill: '#fff'});
+
 		// hearts for lives
 		heartSprite = [];
 		for (var i = 0; i < game.lives; i++) {
@@ -261,6 +278,8 @@ Play.prototype = {
 
 	},
 	update: function() {
+
+		handleHelp(help, helpWait);
 
 		barFill.width = jumpPower * barOutline.width;
 		jumpPower += 0.002;
@@ -499,40 +518,42 @@ function approach(value, valueDest, rate) {
 
 function spawnAvoids() {
 
-	var laneList = [];	
-	for (var i = 0; i < maxSpawn; i++) {
+	if (game.help > game.helpMax) {
+		var laneList = [];
+		for (var i = 0; i < maxSpawn; i++) {
 
-		var currentLane = Math.floor(Math.random() * 3);
-		if (i == 0) {
-			currentLane = playerPos;
-		}
-		var indexInList = -1;
+			var currentLane = Math.floor(Math.random() * 3);
+			if (i == 0) {
+				currentLane = playerPos;
+			}
+			var indexInList = -1;
 
-		// check to make sure we don't spawn more than 1
-		// obstale in the same lane
-		for (var j = 0; j < laneList.length; j++) {
-			if (laneList[j] == currentLane) {
-				indexInList = j;
+			// check to make sure we don't spawn more than 1
+			// obstale in the same lane
+			for (var j = 0; j < laneList.length; j++) {
+				if (laneList[j] == currentLane) {
+					indexInList = j;
+				}
+			}
+			
+			// spawn new obstacle. add it to laneList for next check
+			if (indexInList < 0) {
+				this.enemy = new Avoid(game, 'cone', 'cone', 0.2, 0, currentLane, playerYStart + 80, true);	
+				game.add.existing(this.enemy);
+				laneList.push(currentLane);
 			}
 		}
-		
-		// spawn new obstacle. add it to laneList for next check
-		if (indexInList < 0) {
-			this.enemy = new Avoid(game, 'cone', 'cone', 0.2, 0, currentLane, playerYStart + 80, true);	
-			game.add.existing(this.enemy);
-			laneList.push(currentLane);
-		}
-	}
 
-	if (laneList.length < 3) {
-		spawnsSinceTriple++;
+		if (laneList.length < 3) {
+			spawnsSinceTriple++;
+		}
+		else {
+			spawnsSinceTriple = 0;
+		}
+		console.log("spawnsSinceTriple: " + spawnsSinceTriple);
+		
+		game.score++;
 	}
-	else {
-		spawnsSinceTriple = 0;
-	}
-	console.log("spawnsSinceTriple: " + spawnsSinceTriple);
-	
-	game.score++;
 
 	// spawn decor
 	//this.decor1 = new Decor(game, 'palm', 'palm', 0, 0, -1, playerYStart + 80);
@@ -542,7 +563,9 @@ function spawnAvoids() {
 		game.add.existing(this.decor);
 	}
 	else if (palmSide == 2) {
-		game.time.events.repeat(Phaser.Timer.SECOND * (game.spawnRate / 2), 1, spawnPoint, this);
+		if (game.help > game.helpMax) {
+			game.time.events.repeat(Phaser.Timer.SECOND * (game.spawnRate / 2), 1, spawnPoint, this);
+		}
 	}
 	else {
 		this.decor = new Decor(game, 'palm', 'palm', 0, 0, 4, playerYStart + 80);
@@ -623,4 +646,64 @@ function changeSpawnRate() {
 	else {
 		game.spawnRate = 0.5;
 	}
+}
+
+function handleHelp() {
+
+	var helpDest = 0;
+	game.helpWait--;
+
+	if (game.help == 0) {
+		game.helpText.text = "Use LEFT and RIGHT to move";
+	}
+	else if (game.help == 1) {
+		game.helpText.text = "Use UP to jump when the bar is full";
+	}
+	else if (game.help == 2) {
+		game.helpText.text = "Dodge the cones";
+	}
+	else if (game.help == 3) {
+		game.helpText.text = "Collect the hearts";
+	}
+
+
+
+	var leftPos = (game.world.width / 2) - 500;
+	var centerPos = (game.world.width / 2) - 200;
+	var rightPos = (game.world.width / 2) + 100;
+
+	//if (game.help < game.helpMax) {
+		
+		if (game.helpWait >= 350) {
+			helpDest = rightPos;
+		}
+		else if (game.helpWait >= 180) {
+			helpDest = centerPos;
+		}
+		else {
+			helpDest = leftPos;
+
+			if (game.helpX < leftPos + 20) {
+				game.helpX = rightPos;
+				game.helpText.x = game.helpX;
+				game.help++;
+				game.helpWait = 360;
+			}
+		}
+	//}
+
+	game.helpX = approach(game.helpX, helpDest, 36);
+	var helpAlpha = (300 - (Math.abs(centerPos - game.helpX))) / 300;
+	if (helpAlpha < 0.025) {
+		helpAlpha = 0;
+	}
+	if (game.help > game.helpMax) {
+		helpAlpha = 0;
+	}
+
+	game.helpText.alpha = clamp(helpAlpha, 0, 1);
+
+	//game.helpText.alpha = helpAlpha;
+	game.helpText.x = game.helpX;
+	game.helpText.y = game.helpY;
 }
