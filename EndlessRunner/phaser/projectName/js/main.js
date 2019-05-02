@@ -25,12 +25,6 @@ var helpWait;
 
 
 
-
-
-
-
-
-
 // add states to StateManager
 game.state.add('LogoScreen', LogoScreen);
 game.state.add('MainMenu', MainMenu);
