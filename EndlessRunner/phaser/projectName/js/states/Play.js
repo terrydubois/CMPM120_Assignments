@@ -35,14 +35,14 @@ Play.prototype = {
 		jumpText = game.add.text(16, 180, "JUMP", {fontSize: '25px', fontStyle: 'italic', fill: '#fff'});
 		scoreTextPlusX = 400;
 
-		// initialize help stuff
+		// initialize help text
 		game.helpX = (game.world.width / 2) + 100;
 		game.helpY = (game.world.height / 2) - 60;
 		game.helpWait = 460;
 		game.helpText = game.add.text(16, 180, "Use LEFT and RIGHT to move", {fontSize: '30px', align: 'center', fontStyle: 'italic', fill: '#fff'});
 		game.helpText.alpha = 0;
 
-
+		// draw hearts and heart outlines initially
 		heartSprite = [];
 		heartOutlineSprite = [];
 		for (var i = 0; i < game.lives; i++) {
@@ -81,11 +81,12 @@ Play.prototype = {
 		jumpPower = 0;
 		spawnsSinceTriple = 0;
 
-		// add player
+		// add player to playerGroup for layering purposes
 		player = game.add.sprite(playerXStart - playerPlusX, playerYStart + playerPlusY, 'guy');
 		playerGroup = game.add.group();
 		playerGroup.add(player);
 
+		// make group for front palm trees for layering purposes
 		frontDecorGroup = game.add.group();
 
 		// add physics to Phaser
@@ -94,7 +95,6 @@ Play.prototype = {
 		game.physics.arcade.enable(groundSprite);
 		game.physics.arcade.enable(bgSprite);
 
-		
 		cursors = game.input.keyboard.createCursorKeys();
 
 		// set timer to spawn obstacles
@@ -103,26 +103,32 @@ Play.prototype = {
 	},
 	update: function() {
 
+		// show instructions
 		handleHelp(help, helpWait);
 
+		// set jump-bar width to proper value
 		barFill.width = jumpPower * barOutline.width;
 		jumpPower += 0.002;
 		jumpPower = Math.min(jumpPower, 1);
 
+		// quit to MainMenu if player presses SPACE
 		if (game.input.keyboard.justPressed(Phaser.Keyboard.ESC)) {
 			music.stop();
 			motorcycleSound.stop();
 			game.state.start("MainMenu");
 		}
 
+		// hide HUD stuff if the game has ended
 		if (playerEndGame) {
 			scoreTextPlusX = approach(scoreTextPlusX, 400, 12);
 		}
 		else {
+			// show HUD stuff if player is playing
 			if (scoreTextPlusX >= 1) {
 				scoreTextPlusX = approach(scoreTextPlusX, 0, 12);
 			}
 		}
+		// update X position of HUD stuff
 		scoreText1.x = 24 - scoreTextPlusX;
 		scoreText2.x = 120 - scoreTextPlusX;
 		jumpText.x = 80 - scoreTextPlusX;
@@ -137,6 +143,7 @@ Play.prototype = {
 			if (Math.random() > 0.5) {
 				relativeYOffset *= -1;
 			}
+			// update Y position of HUD stuff with screen shake
 			groundSprite.body.y = (game.world.height / 2) + relativeYOffset;
 			bgSprite.body.y = relativeYOffset;
 			scoreText1.y = 115 + relativeYOffset;
@@ -145,6 +152,7 @@ Play.prototype = {
 			barOutline.y = 150 + relativeYOffset;
 		}
 		else {
+			// update Y position of HUD stuff without screen shake
 			groundSprite.body.y = (game.world.height / 2);
 			bgSprite.body.y = 0;
 			scoreText1.y = 115;
@@ -155,6 +163,7 @@ Play.prototype = {
 		barFill.y = barOutline.y;
 		barOutline2.y = barOutline.y
 
+		// update heart sprites, also update their X & Y
 		for (var i = 0; i < 3; i++) {
 
 			heartOutlineSprite[i].x = 24 + (i * 58) - scoreTextPlusX;
@@ -179,8 +188,11 @@ Play.prototype = {
 			}
 		}
 
+		// set text for score text
 		scoreText1.text = "SCORE: ";
 		scoreText2.text = game.score;
+
+		// update spawn rate so game gets harder as it progressess
 		changeSpawnRate();
 
 		// makes it so player is always on top layer
@@ -235,26 +247,28 @@ Play.prototype = {
 				}
 			}
 
+			// if it's been less than 4 cone spawns since a triple spawn, make it so there is a max of 2 cones per spawn
 			if (spawnsSinceTriple < 4) {
 				maxSpawn = 2;
 			}
 		}
 
+		// if the game is over, make player fall back
 		if (playerEndGame) {
 			playerPlusX = approach(playerPlusX, 500, 12);
-			//playerPlusY = playerPlusX;
 			if (player.body.y >= game.world.height + 200) {
 				game.state.start("GameOver");
 			}
 		}
 		else {
+			// if game is not over, playerPlusX should be 0
 			if (playerPlusX > 0) {
 				playerPlusX = approach(playerPlusX, 0, 12);
 				playerPlusY = playerPlusX;
 			}
 		}
 
-
+		// blink jump-bar outline if the bar is full
 		if (jumpPower >= 1) {
 			if (barOutline2.alpha < 1) {
 				barOutline2.alpha += 0.03;
