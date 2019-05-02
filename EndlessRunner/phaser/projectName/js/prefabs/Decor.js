@@ -3,7 +3,7 @@ function Decor(game, key, frame, scale, rotation, pos, criticalY) {
 
 	this.pos = pos;
 
-	// set velocity of this
+	// set velocity of this object
 	if (this.pos == -1) {
 		this.xVelocity = -120;
 		var xPos = 900;
@@ -16,7 +16,7 @@ function Decor(game, key, frame, scale, rotation, pos, criticalY) {
 
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
 
-	// set anchor point, scale, rotation for this obstacle
+	// set essential variables for this object
 	this.anchor.set(0.5);
 	this.scale.x = scale;
 	this.scale.y = scale;
@@ -53,7 +53,7 @@ Decor.prototype.update = function() {
 	this.body.velocity.x = this.xVelocity;
 	this.body.velocity.y = this.yVelocity;
 
-	// grow scale of star
+	// grow scale of object
 	if (this.scale.x < 1) {
 		this.scale.x += this.rate / 20;
 	}

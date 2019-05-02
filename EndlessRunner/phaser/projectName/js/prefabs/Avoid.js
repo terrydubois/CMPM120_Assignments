@@ -3,13 +3,13 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY, bad) {
 
 	this.pos = pos;
 
-	// set xy position of this
+	// set x & y position of this object
 	var xPos = 900 + (this.pos * 3);
 	var yPos = game.world.height / 2;
 
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
 
-	// set anchor point, scale, rotation for this obstacle
+	// set other essential variables for this object
 	this.anchor.set(0.5);
 	this.scale.x = scale;
 	this.scale.y = scale;
@@ -21,7 +21,7 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY, bad) {
 	this.game = game;
 	this.bad = bad;
 
-	// set velocity of this
+	// set velocity of this object
 	this.xVelocity = -170 + (this.pos * 50);
 	this.yVelocity = 50;
 
@@ -34,7 +34,7 @@ function Avoid(game, key, frame, scale, rotation, pos, criticalY, bad) {
 Avoid.prototype = Object.create(Phaser.Sprite.prototype);
 Avoid.prototype.constructor = Avoid;
 
-// override avoid update function
+// override update function
 Avoid.prototype.update = function() {
 
 	// increase rate to mimic perspective
@@ -49,7 +49,7 @@ Avoid.prototype.update = function() {
 	this.body.velocity.x = this.xVelocity;
 	this.body.velocity.y = this.yVelocity;
 
-	// grow scale of star
+	// grow scale of object
 	if (this.scale.x < 1) {
 		this.scale.x += this.rate / 20;
 	}
