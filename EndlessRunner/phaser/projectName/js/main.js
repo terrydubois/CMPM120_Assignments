@@ -36,11 +36,14 @@ LogoScreen.prototype = {
 		game.load.image('ground', 'assets/img/groundnew_nolines.png');
 		game.load.image('cone', 'assets/img/cone.png');
 		game.load.image('heart', 'assets/img/heart.png');
+		game.load.image('heartOutline', 'assets/img/heartOutline.png');
+		game.load.image('diamond', 'assets/img/diamond.png');
 		game.load.image('palm', 'assets/img/palm.png');
 		game.load.image('title', 'assets/img/title.png');
 		game.load.image('gameover', 'assets/img/gameover.png');
 		game.load.image('barFill', 'assets/img/barFill.png');
 		game.load.image('barOutline', 'assets/img/barOutline.png');
+		game.load.image('barOutline2', 'assets/img/barOutline2.png');
 		game.load.image('logo', 'assets/img/logo.png');
 		game.load.image('whiteout', 'assets/img/whiteout.png');
 		
@@ -209,6 +212,8 @@ Play.prototype = {
 		// jump-bar
 		barFill = game.add.sprite(16, 150, "barFill");
 		barOutline = game.add.sprite(16, 150, "barOutline");
+		barOutline2 = game.add.sprite(16, 150, "barOutline2");
+		barOutline2.alpha = 0;
 
 		// draw score text
 		scoreText1 = game.add.text(16, 16, 'SCORE:', {fontStyle: 'italic', fontSize: '20px', fill: '#facade', align: 'left'});
@@ -218,15 +223,17 @@ Play.prototype = {
 
 		// initialize help stuff
 		game.helpX = (game.world.width / 2) + 100;
-		game.helpY = (game.world.height / 2) - 120;
-		game.helpAlpha = 0;
-		game.helpWait = 360;
+		game.helpY = (game.world.height / 2) - 60;
+		game.helpWait = 460;
 		game.helpText = game.add.text(16, 180, "Use LEFT and RIGHT to move", {fontSize: '30px', align: 'center', fontStyle: 'italic', fill: '#fff'});
+		game.helpText.alpha = 0;
 
-		// hearts for lives
+
 		heartSprite = [];
+		heartOutlineSprite = [];
 		for (var i = 0; i < game.lives; i++) {
 			heartSprite[i] = game.add.sprite(24 + (i * 64), 80, "heart");
+			heartOutlineSprite[i] = game.add.sprite(24 + (i * 64), 80, "heartOutline");
 		}
 
 		// add sounds to game
@@ -236,6 +243,7 @@ Play.prototype = {
 		jumpSound = game.add.audio("jumpSound");
 		pointSound = game.add.audio("pointSound");
 		music = game.add.audio("music");
+		music.loop = true;
 		game.add.audio("motorcycleSound");
 
 		// play music and motorcycle sound
@@ -305,6 +313,7 @@ Play.prototype = {
 		scoreText2.x = 120 - scoreTextPlusX;
 		jumpText.x = 80 - scoreTextPlusX;
 		barOutline.x = 16 - scoreTextPlusX;
+		barOutline2.x = barOutline.x;
 		barFill.x = barOutline.x + 2;
 
 		// custom camera shake (so that I can shake only the Y, not the X)
@@ -330,8 +339,18 @@ Play.prototype = {
 			barOutline.y = 150;
 		}
 		barFill.y = barOutline.y;
+		barOutline2.y = barOutline.y
 
 		for (var i = 0; i < 3; i++) {
+
+			heartOutlineSprite[i].x = 24 + (i * 58) - scoreTextPlusX;
+			if (yOffset > 3) {
+				heartOutlineSprite[i].y = 30 + relativeYOffset;
+			}
+			else {
+				heartOutlineSprite[i].y = 30;
+			}
+
 			if (game.lives < i + 1) {
 				heartSprite[i].kill();
 			}
@@ -420,8 +439,28 @@ Play.prototype = {
 				playerPlusY = playerPlusX;
 			}
 		}
+
+
+		if (jumpPower >= 1) {
+			if (barOutline2.alpha < 1) {
+				barOutline2.alpha += 0.03;
+			}
+			else {
+				barOutline2.alpha = 0;
+			}
+		}
+		else {
+			barOutline2.alpha = 0;
+		}
 	}
 }
+
+
+
+
+
+
+
 
 // define gameover state and methods
 var GameOver = function(game) {};
@@ -432,9 +471,36 @@ GameOver.prototype = {
 	create: function() {
 		console.log('GameOver: create');
 
+		/*
 		if (game.score > game.highscore) {
 			game.highscore = game.score;
 		}
+		*/
+
+		var newHS = false;
+
+		if (localStorage.getItem('highscore') == null) {
+			console.log("no highscore yet");
+			game.highscore = game.score;
+			localStorage.setItem('highscore', game.highscore.toString());
+			newHS = true;
+		}
+		else {
+			let storedScore = parseInt(localStorage.getItem('highscore'));
+
+			if (game.score > storedScore) {
+				console.log('new hs');
+				game.highscore = game.score;
+				localStorage.setItem('highscore', game.highscore.toString());
+				newHS = true;
+			}
+			else {
+				console.log('no new hs');
+				game.highscore = parseInt(localStorage.getItem('highscore'));
+				newHS = false;
+			}
+		}
+		
 
 		music.stop();
 		motorcycleSound.stop();
@@ -447,13 +513,20 @@ GameOver.prototype = {
 		subtitleText1 = game.add.text(120, 240 + gameoverPlusY, "Your final score: " + game.score, {fontSize: '32px', fill: '#fff'});
 		subtitleText2 = game.add.text(120, 280 + gameoverPlusY, "Press SPACE to restart", {fontSize: '32px', fill: '#fff'});
 		groundSprite = game.add.sprite(0, game.world.height / 2, 'ground');
-		highscoreText = game.add.text(120 - gameoverPlusY, 350, "Your highscore: " + game.highscore, {fontSize: '16px', fill: '#fff'});
+
+		var hsText = "Your highscore: " + game.highscore;
+		if (newHS) {
+			hsText = "NEW HIGHSCORE!";
+		}
+		highscoreText = game.add.text(120 - gameoverPlusY, 360, hsText, {fontSize: '20px', fill: '#fff'});
 
 		// roadpaint animation
 		roadPaint = game.add.sprite(0, game.world.height / 2, "roadpaint");
 		roadPaint.animations.add("roadpaint_anim", Phaser.Animation.generateFrameNames("Comp 2_", 0, 29, "", 5), 60, true);
 		roadPaint.animations.play("roadpaint_anim");
 		roadPaint.alpha = 0.5;
+
+		whiteoutSprite = game.add.sprite(0, 0, "whiteout");
 	},
 	update: function() {
 
@@ -480,6 +553,15 @@ GameOver.prototype = {
 		subtitleText1.y = 240 + gameoverPlusY;
 		subtitleText2.y = 280 + gameoverPlusY;
 		highscoreText.x = 120 - gameoverPlusY;
+
+
+
+		if (whiteoutSprite.alpha > 0) {
+			whiteoutSprite.alpha -= 0.04;
+		}
+		else {
+			whiteoutSprite.alpha = 0;
+		}
 	}
 }
 
@@ -590,11 +672,11 @@ function spawnPoint() {
 		currentLane = 0;
 	}
 
-	this.point = new Avoid(game, 'heart', 'heart', 0.2, 0, currentLane, playerYStart + 80, false);	
+	this.point = new Avoid(game, 'diamond', 'diamond', 0.2, 0, currentLane, playerYStart + 40, false);	
 	game.add.existing(this.point);
 }
 
-function collisionTest(pos, bad) {
+function collisionTest(obj, pos, bad) {
 
 	if (pos == playerPos && player.body.y >= playerYStart - 2) {
 
@@ -617,6 +699,8 @@ function collisionTest(pos, bad) {
 
 			game.score += 5;
 			pointSound.play();
+
+			obj.kill();
 		}
 	}
 }
@@ -662,50 +746,57 @@ function handleHelp() {
 		game.helpText.text = "Use UP to jump when the bar is full";
 	}
 	else if (game.help == 2) {
-		game.helpText.text = "Dodge the cones";
+		game.helpText.text = "Avoid the cones";
 	}
 	else if (game.help == 3) {
-		game.helpText.text = "Collect the hearts";
+		game.helpText.text = "Collect diamonds for extra points";
+	}
+
+	if (game.input.keyboard.justPressed(Phaser.Keyboard.Z)) {
+		game.help = game.helpMax;
 	}
 
 
+	var leftPos = (game.world.width / 2) - 600;
+	var centerPos = (game.world.width / 2) - 300;
+	var rightPos = (game.world.width / 2);
 
-	var leftPos = (game.world.width / 2) - 500;
-	var centerPos = (game.world.width / 2) - 200;
-	var rightPos = (game.world.width / 2) + 100;
 
-	//if (game.help < game.helpMax) {
-		
-		if (game.helpWait >= 350) {
-			helpDest = rightPos;
-		}
-		else if (game.helpWait >= 180) {
-			helpDest = centerPos;
-		}
-		else {
-			helpDest = leftPos;
+	if (game.helpWait >= 360) {
+		helpDest = rightPos;
 
-			if (game.helpX < leftPos + 20) {
-				game.helpX = rightPos;
-				game.helpText.x = game.helpX;
-				game.help++;
-				game.helpWait = 360;
-			}
+		game.helpText.alpha = 0;
+	}
+	else if (game.helpWait >= 180) {
+		helpDest = centerPos;
+
+		if (game.helpText.alpha < 1) {
+			game.helpText.alpha += 0.02;
 		}
-	//}
+	}
+	else {
+		helpDest = leftPos;
+
+		if (game.helpText.alpha > 0) {
+			game.helpText.alpha -= 0.02;
+		}
+
+		if (game.helpX < leftPos + 20) {
+			game.helpX = rightPos;
+			game.helpText.x = game.helpX;
+			game.help++;
+			game.helpWait = 360;
+		}
+	}
 
 	game.helpX = approach(game.helpX, helpDest, 36);
-	var helpAlpha = (300 - (Math.abs(centerPos - game.helpX))) / 300;
-	if (helpAlpha < 0.025) {
-		helpAlpha = 0;
-	}
+
 	if (game.help > game.helpMax) {
-		helpAlpha = 0;
+		game.helpText.alpha = 0;
 	}
+	
+	game.helpText.alpha = clamp(game.helpText.alpha, 0, 1);
 
-	game.helpText.alpha = clamp(helpAlpha, 0, 1);
-
-	//game.helpText.alpha = helpAlpha;
 	game.helpText.x = game.helpX;
 	game.helpText.y = game.helpY;
 }

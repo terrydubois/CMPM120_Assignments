@@ -66,7 +66,7 @@ Avoid.prototype.update = function() {
 	// test collision if at critical Y position
 	if (this.body.y >= this.criticalY && !this.testedCollision) {
 		this.testedCollision = true;
-		collisionTest(this.pos, this.bad);
+		collisionTest(this, this.pos, this.bad);
 	}
 	
 	// destroy this obstacle if it is out of bounds
