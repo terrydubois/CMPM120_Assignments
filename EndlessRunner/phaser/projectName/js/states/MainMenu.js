@@ -10,7 +10,7 @@ MainMenu.prototype = {
 
 		playerEndGame = false;
 
-		// main menu text and instructions
+		// add main menu text and backgrounds
 		titlePlusY = 600;
 		pressedSpace = false;
 		bgSprite = game.add.sprite(0, 0, 'sky');
@@ -24,21 +24,23 @@ MainMenu.prototype = {
 		roadPaint.animations.play("roadpaint_anim");
 		roadPaint.alpha = 0.5;
 
-
+		// add credits text(s)
 		creditsText1 = game.add.text(120 - titlePlusY, 350, "Gameplay, programming, and visuals by Terry DuBois", {fontSize: '16px', fill: '#fff'});
 		creditsText6 = game.add.text(120 - titlePlusY, 370, "terrydubois.io", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
 		creditsText2 = game.add.text(120 - titlePlusY, 400, "Music by Lakey Inspired", {fontSize: '16px', fill: '#fff'});
 		creditsText3 = game.add.text(120 - titlePlusY, 420, "soundcloud.com/lakeyinspired", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
 		creditsText4 = game.add.text(120 - titlePlusY, 460, "Motorcycle sound by roman_cgr", {fontSize: '16px', fill: '#fff'});
 		creditsText5 = game.add.text(120 - titlePlusY, 480, "freesound.org/people/roman_cgr", {fontSize: '12px', fontStyle: 'italic', fill: '#fff'});
-		
 
+		// set highscore to 0 (will be changed by browser in GameOver state)
 		game.highscore = 0;
 
+		// fade in from white
 		whiteoutSprite = game.add.sprite(0, 0, "whiteout");
 	},
 	update: function() {
 
+		// fade white screen away
 		if (whiteoutSprite.alpha > 0) {
 			whiteoutSprite.alpha -= 0.04;
 		}
@@ -46,7 +48,7 @@ MainMenu.prototype = {
 			whiteoutSprite.alpha = 0;
 		}
 
-		// main menu logic
+		// if player presses SPACE, hide the title and credits
 		if (pressedSpace) {
 			titlePlusY = approach(titlePlusY, 600, 20);
 			if (titlePlusY >= 550) {
@@ -54,6 +56,7 @@ MainMenu.prototype = {
 			}
 		}
 		else {
+			// if player has not pressed SPACE, show title and credits
 			titlePlusY = approach(titlePlusY, 0, 12);
 			if (titlePlusY < 20) {
 				if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
@@ -62,6 +65,7 @@ MainMenu.prototype = {
 			}
 		}
 
+		// update x & y of MainMenu text objects
 		titleSprite.y = 60 + titlePlusY;
 		subtitleText.y = 250 + titlePlusY;
 		creditsText1.x = 120 - titlePlusY;

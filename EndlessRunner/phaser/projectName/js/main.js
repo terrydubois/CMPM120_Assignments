@@ -31,7 +31,7 @@ game.state.add('MainMenu', MainMenu);
 game.state.add('Play', Play);
 game.state.add('GameOver', GameOver);
 
-
+// start on Logo
 game.state.start('LogoScreen');
 
 
