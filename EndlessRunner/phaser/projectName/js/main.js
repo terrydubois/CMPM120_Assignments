@@ -44,13 +44,15 @@ var helpWait;
 
 
 // add states to StateManager
+game.state.add('Boot', Boot);
+game.state.add('Preload', Preload);
 game.state.add('LogoScreen', LogoScreen);
 game.state.add('MainMenu', MainMenu);
 game.state.add('Play', Play);
 game.state.add('GameOver', GameOver);
 
 // start on Logo
-game.state.start('LogoScreen');
+game.state.start('Boot');
 
 
 
@@ -82,8 +84,8 @@ function approach(value, valueDest, rate) {
 // spawn cones
 function spawnAvoids() {
 
-	// only spawn cones if player has seen instructions
-	if (game.help > game.helpMax) {
+	// only spawn cones if player has seen cone instructions
+	if (game.help > game.helpMax - 2) {
 		var laneList = [];
 
 		for (var i = 0; i < maxSpawn; i++) {
@@ -132,8 +134,8 @@ function spawnAvoids() {
 		game.add.existing(this.decor);
 	}
 	else if (palmSide == 2) {
-		// only spawn diamonds once player has read instructions
-		if (game.help > game.helpMax) {
+		// only spawn diamonds once player has read diamond instructions
+		if (game.help > game.helpMax - 1) {
 			game.time.events.repeat(Phaser.Timer.SECOND * (game.spawnRate / 2), 1, spawnPoint, this);
 		}
 	}
